@@ -180,6 +180,8 @@ RouteUser.post("/login", (req, res)=>{
      
        //res.sendStatus(201)
        res.send({ success:true, message: 'ลบข้อมูลเรียบร้อยแล้ว'})
+
+
        
       })}
     
