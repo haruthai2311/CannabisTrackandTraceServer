@@ -1,7 +1,12 @@
 const express = require('express');
 const status  = require('http-status');
 const app = express();
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
+app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors());
 //MySQL Connection
 //const connection = require('./config/DB');app.use(cors());
 app.get('/', (req, res) => res.send({ ok: true, message: 'Welcome to my api server!',code: status.OK}));
@@ -9,15 +14,7 @@ app.get('/', (req, res) => res.send({ ok: true, message: 'Welcome to my api serv
 const RouteUser = require('./Routes/User');
 app.use('/users',RouteUser);
 
-const date_ob = new Date();
-const day = ("0" + date_ob.getDate()).slice(-2);
-const month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
-const year = date_ob.getFullYear();
-const hours = date_ob.getHours();
-const minutes = date_ob.getMinutes();
-const seconds = date_ob.getSeconds();
-  
-const dateTime = year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
+const dateTime = require('./Routes/dateTime')
 console.log(dateTime);
 
 
