@@ -14,8 +14,17 @@ app.get('/', (req, res) => res.send({ ok: true, message: 'Welcome to my api serv
 const RouteUser = require('./Routes/User');
 app.use('/users',RouteUser);
 
+const RouteTracking =require('./Routes/PlantTrackigs');
+app.use('/trackings',RouteTracking)
+
+const RouteInformations =require('./Routes/Informations')
+app.use('/informations',RouteInformations)
+
 const dateTime = require('./Routes/dateTime')
 console.log(dateTime);
+
+
+
 
 
 app.listen(3000,()=> console.log('Server is running on port 3000!'));
