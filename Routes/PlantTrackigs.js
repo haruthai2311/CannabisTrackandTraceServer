@@ -91,6 +91,60 @@ RouteTracking.post("/planttrackings", async (req,res) => {
     console.log("---------> Invalid data!")
   }}) 
 
+  RouteTracking.put("/editPlanttracking", async (req,res) => {
+    const PlantTrackingID = req.body.PlantTrackingID;
+    const PlantStatus = req.body.PlantStatus;
+    const SoilMoisture = req.body.SoilMoisture;
+    const Remark = req.body.Remark;
+    const SoilRemark = req.body.SoilRemark;
+    const Disease = req.body.Disease;
+    const FixDisease = req.body.FixDisease;
+    const Insect = req.body.Insect;
+    const FixInsect = req.body.FixInsect;
+    const ImageFileName = req.body.ImageFileName;
+    //const Password = req.body.password;
+    //const confirmPassword = req.body.confirmPassword;
+
+  //console.log(dateTime);
+    connection.getConnection( async (err, connection) => {
+     if (err) throw (err)
+     const sqlSearch = "SELECT * FROM plant_trackings WHERE PlantTrackingID = ?"
+     const search_query = mysql.format(sqlSearch,[PlantTrackingID])
+     const sqlUpdate = "UPDATE plant_trackings SET PlantStatus = ?, SoilMoisture = ?,SoilRemark = ? OR NULL,Remark = ? OR NULL,UpdateTime = ?  WHERE PlantTrackingID = ?"
+     const update_query = mysql.format(sqlUpdate,[PlantStatus,SoilMoisture,SoilRemark,Remark,dateTime,PlantTrackingID])
+     // ? will be replaced by values
+     // ?? will be replaced by string
+     await connection.query (search_query, async (err, result) => {
+      if (err) throw (err)
+      console.log("------> Search PlantTrackingID")
+      if (result.length == 0) {
+       connection.release()
+       console.log("------> exists")
+       //res.sendStatus(409) 
+       res.send({ success:false, message: 'ไม่พบการบันทึกผลตวรจประจำวัน!'})
+      } 
+      else {
+        
+       await connection.query (update_query, (err, result)=> {
+       connection.release()
+       if (err) throw (err)
+       console.log ("--------> Update PlantTracking")
+       const sqlUpdatedisease_logs = "UPDATE disease_logs SET Disease = ?, Fix = ?,UpdateTime = ?  WHERE PlantTrackingID = ?";
+       const Updatediseaselogs_query = mysql.format(sqlUpdatedisease_logs, [Disease, FixDisease, dateTime,PlantTrackingID]);
+       connection.query(Updatediseaselogs_query);
+       const sqlUpdateinsect_logs = "UPDATE insect_logs SET Insect = ?, Fix = ?,UpdateTime = ?  WHERE PlantTrackingID = ?";
+       const Updateinsectlogs_query = mysql.format(sqlUpdateinsect_logs, [Insect, FixInsect, dateTime, PlantTrackingID]);
+       connection.query(Updateinsectlogs_query); 
+     
+       //res.sendStatus(201)
+       res.send({ success:true, message: 'แก้ไขข้อมูลเรียบร้อยแล้ว'})
+       
+      })}
+    
+    }) 
+    }) 
+    }) 
+
   RouteTracking.post("/harvests", async (req,res) => {
     const GreenHouseID = req.body.GreenHouseID;
     const HarvestDate = req.body.HarvestDate;
@@ -110,7 +164,7 @@ RouteTracking.post("/planttrackings", async (req,res) => {
     
 
      const sqlInsert = "INSERT INTO harvests (GreenHouseID,HarvestDate,HarvestNo,Type,Weight,LotNo,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,?,?,? OR NULL,?,?)"
-     const insert_query = mysql.format(sqlInsert,[GreenHouseID,HarvestDate,HarvestNo,Type,Weight,LotNo,Remark,dateTime,dateTime])
+     const insert_query = mysql.format(sqlInsert,[GreenHouseID,HarvestDate+" "+TimeNow,HarvestNo,Type,Weight,LotNo,Remark,dateTime,dateTime])
 
      
      // ? will be replaced by values
@@ -118,13 +172,13 @@ RouteTracking.post("/planttrackings", async (req,res) => {
      connection.query(searchGH_query, async (err, result) => {
             if (err)
                 throw (err);
-            console.log("------> Search harvests");
+            console.log("------> Search GreenHouse");
             console.log(result.length);
             if (result.length == 0) {
                 connection.release();
                 console.log("------> exists");
                 //res.sendStatus(409) 
-                res.send({ success: false, message: 'ไม่พบรอบการเก็บเกี่ยว' });
+                res.send({ success: false, message: 'ไม่พบโรงเรือน' });
             }
             else {
                 await connection.query(insert_query, (err, result) => {
@@ -135,7 +189,7 @@ RouteTracking.post("/planttrackings", async (req,res) => {
                     console.log(result.insertId);
                   
 
-                    res.send({ success: true, message: 'บันทึกข้อมูลเรียบร้อยแล้ว', PlantTrackingID: result.insertId });
+                    res.send({ success: true, message: 'บันทึกข้อมูลเรียบร้อยแล้ว', HarvestID: result.insertId });
                 });
                     
             }
@@ -145,6 +199,57 @@ RouteTracking.post("/planttrackings", async (req,res) => {
     res.send({ ok: false, error: 'Invalid data!'});
     console.log("---------> Invalid data!")
   }}) 
+
+  RouteTracking.put("/editHarvests", async (req,res) => {
+    const HarvestID = req.body.HarvestID;
+    const GreenHouseID = req.body.GreenHouseID;
+    const HarvestDate = req.body.HarvestDate;
+    const HarvestNo = req.body.HarvestNo;
+    const Type = req.body.Type;
+    const Weight = req.body.Weight;
+    const LotNo = req.body.LotNo;
+    const Remark = req.body.Remark;
+
+ 
+    connection.getConnection( async (err, connection) => {
+     if (err) throw (err)
+     const sqlSearch = "SELECT * FROM harvests WHERE HarvestID = ?"
+     const search_query = mysql.format(sqlSearch,[HarvestID])
+    
+
+     const sqlUpdate = "UPDATE harvests SET HarvestDate = ?, HarvestNo = ?,Type = ?,Weight = ?, LotNo = ?,Remark=? OR NULL , UpdateTime=?  WHERE  HarvestID = ?"
+     const Update_query = mysql.format(sqlUpdate,[HarvestDate+" "+TimeNow,HarvestNo,Type,Weight,LotNo,Remark,dateTime,HarvestID])
+
+     
+     // ? will be replaced by values
+     // ?? will be replaced by string
+     connection.query(search_query, async (err, result) => {
+            if (err)
+                throw (err);
+            console.log("------> Search harvests");
+            console.log(result.length);
+            if (result.length == 0) {
+                connection.release();
+                console.log("------> exists");
+                //res.sendStatus(409) 
+                res.send({ success: false, message: 'ไม่พบข้อมูลการเก็บเกี่ยว' });
+            }
+            else {
+                await connection.query(Update_query, (err, result) => {
+                    connection.release();
+                    if (err)
+                        throw (err);
+                    console.log("-------->  The data was saved successfully.");
+                 
+                  
+
+                    res.send({ success: true, message: 'แก้ไขข้อมูลเรียบร้อยแล้ว' });
+                });
+                    
+            }
+        }) 
+  }) 
+  }) 
 
 
   RouteTracking.post("/transfers", async (req,res) => {
@@ -168,7 +273,7 @@ RouteTracking.post("/planttrackings", async (req,res) => {
      const search_query = mysql.format(sqlSearch,[HarvestID])
 
      const sqlInsert = "INSERT INTO transfers (HarvestID,TransferDate,Type,Weight,LotNo,GetByName,GetByPlace,LicenseNo,LicensePlate,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,?,?,?,? OR NULL,? OR NULL,? OR NULL,?,?)"
-     const insert_query = mysql.format(sqlInFuture<dynamic>sert,[HarvestID,TransferDate,Type,Weight,LotNo,GetByName,GetByPlace,LicenseNo,LicensePlate,Remark,dateTime,dateTime])
+     const insert_query = mysql.format(sqlInsert,[HarvestID,TransferDate+" "+TimeNow,Type,Weight,LotNo,GetByName,GetByPlace,LicenseNo,LicensePlate,Remark,dateTime,dateTime])
 
      
      // ? will be replaced by values
@@ -203,6 +308,58 @@ RouteTracking.post("/planttrackings", async (req,res) => {
     res.send({ ok: false, error: 'Invalid data!'});
     console.log("---------> Invalid data!")
   }}) 
+
+  RouteTracking.put("/editTransfers", async (req,res) => {
+    const TransferID = req.body.TransferID;
+    const TransferDate = req.body.TransferDate;
+    const Type = req.body.Type;
+    const Weight = req.body.Weight;
+    const LotNo = req.body.LotNo;
+    const GetByName = req.body.GetByName;
+    const GetByPlace = req.body.GetByPlace;
+    const LicenseNo = req.body.LicenseNo;
+    const LicensePlate = req.body.LicensePlate;
+    const Remark = req.body.Remark;
+ 
+    
+  connection.getConnection( async (err, connection) => {
+     if (err) throw (err)
+     const sqlSearch = "SELECT * FROM transfers WHERE TransferID = ?"
+     const search_query = mysql.format(sqlSearch,[TransferID])
+
+     const sqlUpdate = "UPDATE transfers SET TransferDate=?,Type=?,Weight=?,LotNo=?,GetByName=?,GetByPlace=?,LicenseNo=? OR NULL,LicensePlate=? OR NULL,Remark=? OR NULL,UpdateTime=? WHERE  TransferID = ?"
+     const Update_query = mysql.format(sqlUpdate,[TransferDate+" "+TimeNow,Type,Weight,LotNo,GetByName,GetByPlace,LicenseNo,LicensePlate,Remark,dateTime,TransferID])
+
+     
+     // ? will be replaced by values
+     // ?? will be replaced by string
+     connection.query(search_query, async (err, result) => {
+            if (err)
+                throw (err);
+            console.log("------> Search transfers");
+            console.log(result.length);
+            if (result.length == 0) {
+                connection.release();
+                console.log("------> exists");
+                //res.sendStatus(409) 
+                res.send({ success: false, message: 'ไม่พบข้อมูลการส่งมอบ' });
+            }
+            else {
+                await connection.query(Update_query, (err, result) => {
+                    connection.release();
+                    if (err)
+                        throw (err);
+                    console.log("-------->  The data was saved successfully.");
+                    console.log(result.insertId);
+                  
+
+                    res.send({ success: true, message: 'แก้ไขข้อมูลเรียบร้อยแล้ว'});
+                });
+                    
+            }
+        }) 
+  }) 
+  }) 
 
 
 

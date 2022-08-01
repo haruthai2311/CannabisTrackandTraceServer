@@ -5,7 +5,9 @@ const connection = require('../config/DB');
 const mysql = require('mysql');
 const md5 = require('md5');
 RouteInformations.use(express.json());
-const dateTime = require('./dateTime')
+const dateTime = require('./dateTime');
+const TimeNow = require('./TimeNow');
+
 
 
 RouteInformations.post("/addStrains", async (req,res) => {
@@ -244,7 +246,7 @@ RouteInformations.post("/addStrains", async (req,res) => {
      const searchStrain_query = mysql.format(sqlSearchStrain,[StrainID])
      
      const sqlInsert = "INSERT INTO cultivations (GreenHouseID,StrainID,No,SeedDate,MoveDate,SeedTotal,SeedNet,PlantTotal,PlantLive,PlantDead,Remark,CreateTime, UpdateTime) VALUES (?,?,?,?,?,?,?,?,?,?,? OR NULL,?,?)"
-     const insert_query = mysql.format(sqlInsert,[GreenHouseID,StrainID,No,SeedDate,MoveDate,SeedTotal,SeedNet,PlantTotal,PlantLive,PlantDead,Remark,dateTime,dateTime])
+     const insert_query = mysql.format(sqlInsert,[GreenHouseID,StrainID,No,SeedDate+" "+TimeNow,MoveDate+" "+TimeNow,SeedTotal,SeedNet,PlantTotal,PlantLive,PlantDead,Remark,dateTime,dateTime])
 
       
      // ?? will be replaced by string
