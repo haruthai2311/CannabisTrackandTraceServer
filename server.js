@@ -11,16 +11,16 @@ app.use(cors());
 //const connection = require('./config/DB');app.use(cors());
 app.get('/', (req, res) => res.send({ ok: true, message: 'Welcome to my api server!',code: status.OK}));
 
-const RouteUser = require('./Routes/User');
+const RouteUser = require('./Routes/RouteUser');
 app.use('/users',RouteUser);
 
-const RouteTracking =require('./Routes/PlantTrackigs');
+const RouteTracking =require('./Routes/RouteTracking');
 app.use('/trackings',RouteTracking)
 
-const RouteInformations =require('./Routes/Informations')
+const RouteInformations =require('./Routes/RouteInformations')
 app.use('/informations',RouteInformations)
 
-const dateTime = require('./Routes/dateTime')
+const dateTime = require('./Controller/dateTime')
 console.log(dateTime);
 
 
