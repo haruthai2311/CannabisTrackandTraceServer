@@ -5,7 +5,8 @@ const connection = require('../config/DB');
 const mysql = require('mysql');
 const md5 = require('md5');
 RouteUser.use(express.json());
-const dateTime = require('./dateTime')
+const Time = require('./dateTime')
+const dateTime = Time.dateTime
 
 
 //## Register ##//

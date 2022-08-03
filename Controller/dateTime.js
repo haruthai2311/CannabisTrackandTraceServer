@@ -6,5 +6,5 @@ const hours = date_ob.getHours();
 const minutes = date_ob.getMinutes();
 const seconds = date_ob.getSeconds();
 const dateTime = year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
-
-module.exports = dateTime;
+const TimeNow = hours + ":" + minutes + ":" + seconds;
+module.exports = {dateTime,TimeNow}

@@ -4,8 +4,9 @@ const RouteInformations = express.Router();
 const connection = require('../config/DB');
 const mysql = require('mysql');
 RouteInformations.use(express.json());
-const dateTime = require('./dateTime');
-const TimeNow = require('./TimeNow');
+const Time = require('./dateTime')
+const dateTime = Time.dateTime
+const TimeNow = Time.TimeNow
 
 //## Add Strains ##//
 const addStrains = async (req, res) => {
