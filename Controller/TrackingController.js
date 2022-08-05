@@ -23,6 +23,10 @@ const addPlanttrackking = async (req, res) => {
     const FixInsect = req.body.FixInsect;
     const ImageFileName = req.body.ImageFileName;
     const CheckDateTime = CheckDate + " " + TimeNow;
+    const Weight = req.body.Weight;
+    const LogTime = req.body.LogTime;
+    const TrashRemark = req.body.TrashRemark;
+    const RemarkTrash_log = req.body.RemarkTrash_log;
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
     if (
@@ -33,7 +37,7 @@ const addPlanttrackking = async (req, res) => {
         Disease &&
         FixDisease &&
         Insect &&
-        FixInsect
+        FixInsect&&Weight&&LogTime&&TrashRemark
     ) {
         connection.getConnection(async (err, connection) => {
             if (err) throw err;
@@ -102,6 +106,13 @@ const addPlanttrackking = async (req, res) => {
                                         [result.insertId, Insect, FixInsect, dateTime, dateTime]
                                     );
                                     connection.query(insertinsectlogs_query);
+                                    const sqlInserttrash_logs =
+                                        "INSERT INTO trash_logs (PlantTrackingID,Weight,LogTime,TrashRemark,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,? OR NULL,?,?)";
+                                    const inserttrashlogssquery = mysql.format(
+                                        sqlInserttrash_logs,
+                                        [result.insertId, Weight, LogTime, TrashRemark,RemarkTrash_log,dateTime, dateTime]
+                                    );
+                                    connection.query(inserttrashlogssquery);
 
                                     res.send({
                                         success: true,

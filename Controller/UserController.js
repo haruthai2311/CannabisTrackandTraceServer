@@ -7,6 +7,7 @@ const md5 = require('md5');
 RouteUser.use(express.json());
 const Time = require('./dateTime')
 const dateTime = Time.dateTime
+const jwt = require('jsonwebtoken');
 
 
 //## Register ##//
@@ -92,9 +93,9 @@ const User = (req, res) => {
                     //console.log(hashedPassword)
                     //get the hashedPassword from result
                     if (result[0]['Password'] == hashedPassword) {
-
+                        const token = jwt.sign({id:result[0]['UserID']},'the-super-strong-secrect',)
                         console.log("---------> Login Successful")
-                        res.send({ success: true, message: `${result[0]['FNameE']} ${result[0]['LNameE']} is logged in!` })
+                        res.send({ success: true, message: `${result[0]['FNameE']} ${result[0]['LNameE']} is logged in!` ,token,user: result[0]})
                     }
                     else {
                         console.log("---------> Password Incorrect")
