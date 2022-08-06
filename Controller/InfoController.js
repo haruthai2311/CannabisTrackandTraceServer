@@ -158,6 +158,30 @@ const addGreenhouses = async (req, res) => {
     }
 }
 
+const getGreenhouses = async (req, res) => {
+    connection.getConnection(async (err, connection) => {
+        if (err) throw (err)
+        const search_query = mysql.format("SELECT * FROM `greenhouses` WHERE IsActive = 'Y'")
+
+
+        await connection.query(search_query, async (err, result) => {
+            if (err) throw (err)
+            console.log("------> Search Results")
+            if (result.length == 0) {
+                connection.release()
+                console.log("------> Users already exists")
+                //res.sendStatus(409) 
+                res.send({ success: false, message: 'ไม่มีข้อมูล!' })
+            }
+            else {
+
+                res.send({result })
+            }
+        })
+    })
+
+}
+
 //## Add Pots ##//
 const addPots = async (req, res) => {
     const GreenHouseID = req.body.GreenHouseID;
@@ -415,6 +439,6 @@ const addChemicalUses = async (req, res) => {
     }
 }
 
-module.exports = { addStrains, addLocations, addGreenhouses, addPots, addCultivations, addInventorys, addChemicalUses }
+module.exports = { addStrains, addLocations, addGreenhouses, addPots, addCultivations, addInventorys, addChemicalUses, getGreenhouses }
 
 

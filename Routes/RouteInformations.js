@@ -11,6 +11,7 @@ RouteInformations.post("/addLocations", Infocontroller.addLocations)
 
 
 RouteInformations.post("/addGreenhouses", Infocontroller.addGreenhouses)
+RouteInformations.get("/getAllGreenhouses", Infocontroller.getGreenhouses)
 
 
 RouteInformations.post("/addPots", Infocontroller.addPots)

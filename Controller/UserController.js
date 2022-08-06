@@ -93,9 +93,9 @@ const User = (req, res) => {
                     //console.log(hashedPassword)
                     //get the hashedPassword from result
                     if (result[0]['Password'] == hashedPassword) {
-                        const token = jwt.sign({id:result[0]['UserID']},'the-super-strong-secrect',)
+                        const token = jwt.sign({ id: result[0]['UserID'] }, 'the-super-strong-secrect',)
                         console.log("---------> Login Successful")
-                        res.send({ success: true, message: `${result[0]['FNameE']} ${result[0]['LNameE']} is logged in!` ,token,user: result[0]})
+                        res.send({ success: true, message: `${result[0]['FNameE']} ${result[0]['LNameE']} is logged in!`, token, user: result[0] })
                     }
                     else {
                         console.log("---------> Password Incorrect")
@@ -193,5 +193,38 @@ const deleteUserByID = async (req, res) => {
     })
 }
 
+const getUsers = async (req, res) => {
 
-module.exports = { addUser, User, editProfile, deleteUserByID }
+    try {
+        connection.getConnection(async (err, connection) => {
+            if (err) throw (err)
+            const search_query = mysql.format("SELECT * FROM `users`")
+
+
+            await connection.query(search_query, async (err, result) => {
+                if (err) throw (err)
+                console.log("------> Search Results")
+                if (result.length == 0) {
+                    connection.release()
+                    console.log("------> Users already exists")
+                    //res.sendStatus(409) 
+                    res.send({ success: false, message: 'ไม่มีข้อมูล!' })
+                }
+                else {
+
+                    res.send({ success: true, message: result })
+                }
+            })
+        })
+
+    } catch (e) {
+        return res.status(500).json({
+            resp: false,
+            msg: e
+        });
+    }
+
+}
+
+
+module.exports = { addUser, User, editProfile, deleteUserByID, getUsers }

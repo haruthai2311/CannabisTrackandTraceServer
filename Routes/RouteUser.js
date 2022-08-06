@@ -9,5 +9,6 @@ RouteUser.post("/login", Usercontroller.User);
 RouteUser.put("/editProfile", Usercontroller.editProfile);
 RouteUser.delete("/deleteuser", Usercontroller.deleteUserByID);
 
+RouteUser.get('/getAllUsers',Usercontroller.getUsers)
 
 module.exports = RouteUser;

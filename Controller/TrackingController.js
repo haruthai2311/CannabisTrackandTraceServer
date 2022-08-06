@@ -206,7 +206,7 @@ const editPlanttracking = async (req, res) => {
 
 //## Add Harvests ##//
 const addHarvests = async (req, res) => {
-    const GreenHouseID = req.body.GreenHouseID;
+    const GreenHouseName = req.body.GreenHouseName;
     const HarvestDate = req.body.HarvestDate;
     const HarvestNo = req.body.HarvestNo;
     const Type = req.body.Type;
@@ -216,16 +216,14 @@ const addHarvests = async (req, res) => {
 
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
-    if (GreenHouseID && HarvestDate && HarvestNo && Type && Weight && LotNo) {
+    if (GreenHouseName && HarvestDate && HarvestNo && Type && Weight && LotNo) {
         connection.getConnection(async (err, connection) => {
             if (err) throw (err)
-            const sqlSearchGH = "SELECT * FROM greenhouses WHERE GreenHouseID = ?"
-            const searchGH_query = mysql.format(sqlSearchGH, [GreenHouseID])
+            const sqlSearchGH = "SELECT * FROM greenhouses WHERE Name = ?"
+            const searchGH_query = mysql.format(sqlSearchGH, [GreenHouseName])
 
 
-            const sqlInsert = "INSERT INTO harvests (GreenHouseID,HarvestDate,HarvestNo,Type,Weight,LotNo,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,?,?,? OR NULL,?,?)"
-            const insert_query = mysql.format(sqlInsert, [GreenHouseID, HarvestDate + " " + TimeNow, HarvestNo, Type, Weight, LotNo, Remark, dateTime, dateTime])
-
+            
 
             // ? will be replaced by values
             // ?? will be replaced by string
@@ -241,6 +239,10 @@ const addHarvests = async (req, res) => {
                     res.send({ success: false, message: 'ไม่พบโรงเรือน' });
                 }
                 else {
+                    console.log(result[0]["GreenHouseID"])
+                    const sqlInsert = "INSERT INTO harvests (GreenHouseID,HarvestDate,HarvestNo,Type,Weight,LotNo,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,?,?,? OR NULL,?,?)"
+                    const insert_query = mysql.format(sqlInsert, [result[0]["GreenHouseID"], HarvestDate + " " + TimeNow, HarvestNo, Type, Weight, LotNo, Remark, dateTime, dateTime])
+
                     await connection.query(insert_query, (err, result) => {
                         connection.release();
                         if (err)
