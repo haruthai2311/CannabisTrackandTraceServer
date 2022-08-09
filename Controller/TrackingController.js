@@ -1,4 +1,3 @@
-"use strict";
 const express = require("express");
 const RouteInformations = express.Router();
 const connection = require("../config/DB");
@@ -37,7 +36,7 @@ const addPlanttrackking = async (req, res) => {
         Disease &&
         FixDisease &&
         Insect &&
-        FixInsect&&Weight&&LogTime&&TrashRemark
+        FixInsect && Weight && LogTime && TrashRemark
     ) {
         connection.getConnection(async (err, connection) => {
             if (err) throw err;
@@ -110,7 +109,7 @@ const addPlanttrackking = async (req, res) => {
                                         "INSERT INTO trash_logs (PlantTrackingID,Weight,LogTime,TrashRemark,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,? OR NULL,?,?)";
                                     const inserttrashlogssquery = mysql.format(
                                         sqlInserttrash_logs,
-                                        [result.insertId, Weight, LogTime, TrashRemark,RemarkTrash_log,dateTime, dateTime]
+                                        [result.insertId, Weight, LogTime, TrashRemark, RemarkTrash_log, dateTime, dateTime]
                                     );
                                     connection.query(inserttrashlogssquery);
 
@@ -219,11 +218,11 @@ const addHarvests = async (req, res) => {
     if (GreenHouseName && HarvestDate && HarvestNo && Type && Weight && LotNo) {
         connection.getConnection(async (err, connection) => {
             if (err) throw (err)
-            const sqlSearchGH = "SELECT * FROM greenhouses WHERE Name = ?"
+            const sqlSearchGH = "SELECT * FROM greenhouses WHERE Name = ?z"
             const searchGH_query = mysql.format(sqlSearchGH, [GreenHouseName])
 
 
-            
+
 
             // ? will be replaced by values
             // ?? will be replaced by string
@@ -239,7 +238,7 @@ const addHarvests = async (req, res) => {
                     res.send({ success: false, message: 'ไม่พบโรงเรือน' });
                 }
                 else {
-                    console.log(result[0]["GreenHouseID"])
+                    //console.log(result[0]["GreenHouseID"])
                     const sqlInsert = "INSERT INTO harvests (GreenHouseID,HarvestDate,HarvestNo,Type,Weight,LotNo,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,?,?,? OR NULL,?,?)"
                     const insert_query = mysql.format(sqlInsert, [result[0]["GreenHouseID"], HarvestDate + " " + TimeNow, HarvestNo, Type, Weight, LotNo, Remark, dateTime, dateTime])
 
@@ -427,4 +426,80 @@ const editTransfers = async (req, res) => {
     })
 }
 
-module.exports = { addPlanttrackking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers };
+//## Add Cultivations ##//
+const addCultivations = async (req, res) => {
+    const GreenHouseName = req.body.GreenHouseName;
+    const StrainName = req.body.StrainName;
+    const No = req.body.No;
+    const SeedDate = req.body.SeedDate;
+    const MoveDate = req.body.MoveDate;
+    const SeedTotal = req.body.SeedTotal;
+    const SeedNet = req.body.SeedNet;
+    const PlantTotal = req.body.PlantTotal;
+    const PlantLive = req.body.PlantLive;
+    const PlantDead = req.body.PlantDead;
+    const Remark = req.body.Remark;
+
+
+    //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
+    if (GreenHouseName && StrainName && No && SeedDate && MoveDate && SeedTotal && SeedNet && PlantTotal && PlantLive && PlantDead) {
+        connection.getConnection(async (err, connection) => {
+            if (err) throw (err)
+            const sqlSearchGH = "SELECT * FROM greenhouses WHERE Name = ?"
+            const searchGH_query = mysql.format(sqlSearchGH, [GreenHouseName])
+
+            const sqlSearchStrain = "SELECT * FROM strains WHERE Name = ?"
+            const searchStrain_query = mysql.format(sqlSearchStrain, [StrainName])
+
+          
+
+            // ?? will be replaced by string
+            connection.query(searchGH_query, async (err, resultGH) => {
+                if (err)
+                    throw (err);
+                console.log("------> Search Name GreenHouse");
+                console.log(resultGH.length);
+                if (resultGH.length == 0) {
+                    connection.release();
+                    console.log("------> exists");
+                    //res.sendStatus(409) 
+                    res.send({ success: false, message: 'ไม่พบโรงปลูก' });
+                }
+                else {
+                    connection.query(searchStrain_query, async (err, result) => {
+                        if (err)
+                            throw (err);
+                        console.log("------> Search Name Strain");
+                        //console.log(result.length);
+                        if (result.length == 0) {
+                            connection.release();
+                            console.log("------> exists");
+                            //res.sendStatus(409) 
+                            res.send({ success: false, message: 'ไม่พบข้อมูลสายพันธุ์' });
+                        }
+                        else {
+                            //console.log(resultGH[0]["GreenHouseID"])
+                            //console.log(result[0]["StrainID"])
+                            const sqlInsert = "INSERT INTO cultivations (GreenHouseID,StrainID,No,SeedDate,MoveDate,SeedTotal,SeedNet,PlantTotal,PlantLive,PlantDead,Remark,CreateTime, UpdateTime) VALUES (?,?,?,?,?,?,?,?,?,?,? OR NULL,?,?)"
+                            const insert_query = mysql.format(sqlInsert, [resultGH[0]["GreenHouseID"], result[0]["StrainID"], No, SeedDate + " " + TimeNow, MoveDate + " " + TimeNow, SeedTotal, SeedNet, PlantTotal, PlantLive, PlantDead, Remark, dateTime, dateTime])
+                
+                            connection.query(insert_query, async (err, result) => {
+                                if (err)
+                                    throw (err);
+                                console.log("-------->  The data was saved successfully.");
+
+                                res.send({ success: true, message: 'บันทึกข้อมูลเรียบร้อยแล้ว', CultivationID: result.insertId });
+
+                            });
+                        }
+                    })
+                }
+            })
+        })
+    } else {
+        res.send({ ok: false, error: 'Invalid data!' });
+        console.log("---------> Invalid data!")
+    }
+}
+
+module.exports = { addPlanttrackking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers ,addCultivations};

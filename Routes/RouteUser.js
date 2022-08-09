@@ -1,4 +1,3 @@
-'use strict';
 const express = require('express');
 const RouteUser = express.Router();
 RouteUser.use(express.json());

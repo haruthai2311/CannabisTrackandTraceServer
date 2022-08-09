@@ -1,4 +1,3 @@
-'use strict';
 const express = require('express');
 const RouteTracking = express.Router();
 RouteTracking.use(express.json());
@@ -13,5 +12,6 @@ RouteTracking.put("/editHarvests", Trackingcontroller.editHarvests);
 RouteTracking.post("/transfers", Trackingcontroller.addTransfers);
 RouteTracking.put("/editTransfers", Trackingcontroller.editTransfers)
 
+RouteTracking.post("/addCultivations", Trackingcontroller.addCultivations)
 
 module.exports = RouteTracking;

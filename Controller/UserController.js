@@ -1,4 +1,3 @@
-'use strict';
 const express = require('express');
 const RouteUser = express.Router();
 const connection = require('../config/DB');
@@ -31,7 +30,7 @@ const addUser = async (req, res) => {
             const search_query = mysql.format(sqlSearch, [username])
 
             const sqlInsert = "INSERT INTO users (Username,Password,Email,FNameT,LNameT,FNameE,LNameE,IsDisabled,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
-            const insert_query = mysql.format(sqlInsert, [username, hashedPassword, email, fnameT, lnameT, fnameE, lnameE, '1', dateTime, fnameT, dateTime, fnameT])
+            const insert_query = mysql.format(sqlInsert, [username, hashedPassword, email, fnameT, lnameT, fnameE, lnameE, 'N', dateTime, fnameT, dateTime, fnameT])
             // ? will be replaced by values
             // ?? will be replaced by string
             await connection.query(search_query, async (err, result) => {
