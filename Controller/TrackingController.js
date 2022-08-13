@@ -1,6 +1,6 @@
 const express = require("express");
 const RouteInformations = express.Router();
-const connection = require("../config/DB");
+const connection = require("../config/configDB");
 const mysql = require("mysql");
 RouteInformations.use(express.json());
 const Time = require('./dateTime')

@@ -10,7 +10,7 @@ app.use(cors());
 
 //MySQL Connection
 //const connection = require('./config/DB');app.use(cors());
-app.get('/', (req, res) => res.send({ ok: true, message: 'Welcome to my api server!', code: status.OK }));
+app.get('/', (req, res) => res.send({ ok: true, message: 'Welcome to my api server!❤', code: status.OK }));
 
 const RouteUser = require('./Routes/RouteUser');
 app.use('/users', RouteUser);
@@ -23,9 +23,6 @@ app.use('/informations', RouteInformations)
 
 const Time = require('./Controller/dateTime')
 console.log(Time.dateTime);
-
-
-
 
 
 app.listen(3000, () => console.log('Server is running on port 3000!'));

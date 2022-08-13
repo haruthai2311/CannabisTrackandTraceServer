@@ -1,6 +1,6 @@
 const express = require('express');
 const RouteUser = express.Router();
-const connection = require('../config/DB');
+const connection = require('../config/configDB');
 const mysql = require('mysql');
 const md5 = require('md5');
 RouteUser.use(express.json());
