@@ -218,7 +218,7 @@ const addHarvests = async (req, res) => {
     if (GreenHouseName && HarvestDate && HarvestNo && Type && Weight && LotNo) {
         connection.getConnection(async (err, connection) => {
             if (err) throw (err)
-            const sqlSearchGH = "SELECT * FROM greenhouses WHERE Name = ?z"
+            const sqlSearchGH = "SELECT * FROM greenhouses WHERE Name = ?"
             const searchGH_query = mysql.format(sqlSearchGH, [GreenHouseName])
 
 

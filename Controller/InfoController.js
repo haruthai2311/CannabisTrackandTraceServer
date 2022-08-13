@@ -124,6 +124,9 @@ const addGreenhouses = async (req, res) => {
             const sqlSearch = "SELECT * FROM locations WHERE LocationID = ?"
             const search_query = mysql.format(sqlSearch, [LocationID])
 
+            const sqlSearchName = "SELECT * FROM greenhouses WHERE Name = ?"
+            const searchName_query = mysql.format(sqlSearchName, [Name])
+
             const sqlInsert = "INSERT INTO greenhouses (locationID,Name, IsActive, Remark, CreateTime, UpdateTime) VALUES (?,?,?,? OR NULL,?,?)"
             const insert_query = mysql.format(sqlInsert, [LocationID, Name, 'Y', Remark, dateTime, dateTime])
 
@@ -132,7 +135,7 @@ const addGreenhouses = async (req, res) => {
             connection.query(search_query, async (err, result) => {
                 if (err)
                     throw (err);
-                console.log("------> Search Name Location");
+                console.log("------> Search Name Greenhouses");
                 console.log(result.length);
                 if (result.length == 0) {
                     connection.release();
@@ -141,13 +144,27 @@ const addGreenhouses = async (req, res) => {
                     res.send({ success: false, message: 'ไม่พบสถานที่' });
                 }
                 else {
-                    connection.query(insert_query, async (err, result) => {
+                    connection.query(search_query, async (err, result) => {
                         if (err)
                             throw (err);
+                        console.log("------> Search Name Location");
+                        console.log(result.length);
+                        if (result.length != 0) {
+                            connection.release();
+                            console.log("------> exists");
+                            //res.sendStatus(409) 
+                            res.send({ success: false, message: 'มีข้อมูลในระบบแล้ว' });
+                        }
+                        else {
+                            connection.query(insert_query, async (err, result) => {
+                                if (err)
+                                    throw (err);
 
-                        res.send({ success: true, message: 'บันทึกข้อมูลเรียบร้อยแล้ว', GreenhouseID: result.insertId });
+                                res.send({ success: true, message: 'บันทึกข้อมูลเรียบร้อยแล้ว', GreenhouseID: result.insertId });
 
-                    });
+                            });
+                        }
+                    })
                 }
             })
         })
@@ -174,8 +191,8 @@ const getGreenhouses = async (req, res) => {
             }
             else {
 
-                res.send({result })
-                
+                res.send({ result })
+
             }
         })
     })
@@ -267,7 +284,7 @@ const getStrains = async (req, res) => {
             }
             else {
 
-                res.send({result })
+                res.send({ result })
             }
         })
     })
@@ -392,6 +409,6 @@ const addChemicalUses = async (req, res) => {
     }
 }
 
-module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses ,getStrains}
+module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains }
 
 
