@@ -19,6 +19,8 @@ RouteInformations.post("/addPots", Infocontroller.addPots)
 
 
 RouteInformations.post("/addInventorys", Infocontroller.addInventorys)
+RouteInformations.get("/getInventorys", Infocontroller.getInventorys)
+
 
 RouteInformations.post("/addChemicalUses", Infocontroller.addChemicalUses)
 

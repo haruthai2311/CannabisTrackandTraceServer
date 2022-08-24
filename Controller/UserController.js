@@ -30,7 +30,7 @@ const addUser = async (req, res) => {
             const search_query = mysql.format(sqlSearch, [username])
 
             const sqlInsert = "INSERT INTO users (Username,Password,Email,FNameT,LNameT,FNameE,LNameE,IsDisabled,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
-            const insert_query = mysql.format(sqlInsert, [username, hashedPassword, email, fnameT, lnameT, fnameE, lnameE, 'N', dateTime, fnameT, dateTime, fnameT])
+            const insert_query = mysql.format(sqlInsert, [username, hashedPassword, email, fnameT, lnameT, fnameE, lnameE, 'N', dateTime, '', dateTime, ''])
             // ? will be replaced by values
             // ?? will be replaced by string
             await connection.query(search_query, async (err, result) => {
@@ -40,7 +40,7 @@ const addUser = async (req, res) => {
                 if (result.length != 0) {
                     connection.release()
                     console.log("------> User already exists")
-                    //res.sendStatus(409) 
+                    Controller / UserController.js                    //res.sendStatus(409) 
                     res.send({ success: false, message: 'ชื่อผู้ใช้นี้มีอยู่ในระบบแล้ว!' })
                 }
                 else {
@@ -50,6 +50,11 @@ const addUser = async (req, res) => {
                             if (err) throw (err)
                             console.log("--------> Created new User")
                             console.log(result.insertId)
+                            const sqlUpdate = "UPDATE users SET CreateBy= ?,UpdateBy = ?  WHERE UserID = ?"
+                            const update_query = mysql.format(sqlUpdate, [result.insertId, result.insertId, result.insertId])
+
+                            connection.query(update_query)
+
                             //res.sendStatus(201)
                             res.send({ success: true, message: 'สร้างบัญชีเรียบร้อยแล้ว', UserID: result.insertId })
                         })
@@ -192,36 +197,26 @@ const deleteUserByID = async (req, res) => {
     })
 }
 
-const getUsers = async (req, res) => {
+const getUsers = function (req, res) {
+    connection.query(
+        'SELECT * FROM `users` ',
+        function (err, results) {
+            if (err) throw err;
 
-    try {
-        connection.getConnection(async (err, connection) => {
-            if (err) throw (err)
-            const search_query = mysql.format("SELECT * FROM `users`")
-
-
-            await connection.query(search_query, async (err, result) => {
-                if (err) throw (err)
-                console.log("------> Search Results")
-                if (result.length == 0) {
-                    connection.release()
-                    console.log("------> Users already exists")
-                    //res.sendStatus(409) 
-                    res.send({ success: false, message: 'ไม่มีข้อมูล!' })
-                }
-                else {
-
-                    res.send({ success: true, message: result })
-                }
-            })
-        })
-
-    } catch (e) {
-        return res.status(500).json({
-            resp: false,
-            msg: e
-        });
-    }
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> Users already exists")
+                //res.sendStatus(409) 
+                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+            }
+            else {
+                console.log("------> Search Users")
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        }
+    );
 
 }
 

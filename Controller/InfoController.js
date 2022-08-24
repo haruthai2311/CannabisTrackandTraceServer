@@ -11,7 +11,10 @@ const TimeNow = Time.TimeNow
 const addStrains = async (req, res) => {
     const Name = req.body.Name;
     const ShortName = req.body.ShortName;
+    const IsActive = req.body.IsActive;
     const Remark = req.body.Remark;
+    const CreateBy = req.body.CreateBy;
+    const UpdateBy = req.body.UpdateBy
 
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
@@ -21,8 +24,8 @@ const addStrains = async (req, res) => {
             const sqlSearch = "SELECT * FROM strains WHERE Name = ?"
             const search_query = mysql.format(sqlSearch, [Name])
 
-            const sqlInsert = "INSERT INTO strains (Name,ShortName,IsActive,Remark,CreateTime,UpdateTime) VALUES (?,? OR NULL,?,? OR NULL,?,?)"
-            const insert_query = mysql.format(sqlInsert, [Name, ShortName, 'Y', Remark, dateTime, dateTime])
+            const sqlInsert = "INSERT INTO strains (Name,ShortName,IsActive,Remark,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,? OR NULL,?,? OR NULL,?,?,?,?)"
+            const insert_query = mysql.format(sqlInsert, [Name, ShortName, IsActive, Remark, dateTime,CreateBy, dateTime,UpdateBy])
 
 
             // ?? will be replaced by string
@@ -68,7 +71,20 @@ const addLocations = async (req, res) => {
     const Long = req.body.Long;
     const Telephone = req.body.Telephone;
     const Remark = req.body.Remark;
+    const IsActive = req.body.IsActive;
+    //const CreateBy = req.body.CreateBy;
+    //const UpdateBy = req.body.UpdateBy
 
+ 
+//ได้แต่มันซับซ้อนเกินไป
+    // if (typeof Lat === 'string' && Lat.trim().length === 0) {
+    //     const lat ='NUL'
+    //   console.log(lat);
+    // } else {
+    //     const lat =Lat
+    //     console.log(lat);
+    //   console.log('string is NOT empty');
+    // }
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
     if (Name && SubDistrictID && DistrictID && ProvinceID && PostCode) {
@@ -77,8 +93,11 @@ const addLocations = async (req, res) => {
             const sqlSearch = "SELECT * FROM locations WHERE Name = ?"
             const search_query = mysql.format(sqlSearch, [Name])
             console.log(dateTime)
-            const sqlInsert = "INSERT INTO locations (Name, AddrNo, Moo, Road, SubDistrictID, DistrictID, ProvinceID, PostCode, Lat, `Long`, Telephone, IsActive, Remark, CreateTime, UpdateTime) VALUES (?,? OR NULL,? OR NULL,? OR NULL,?,?,?,?,? OR NULL,? OR NULL,? OR NULL,?,? OR NULL,?,?)"
-            const insert_query = mysql.format(sqlInsert, [Name, AddrNo, Moo, Road, SubDistrictID, DistrictID, ProvinceID, PostCode, Lat, Long, Telephone, 'Y', Remark, dateTime, dateTime])
+            // const sqlInsert = "INSERT INTO locations (Name, AddrNo, Moo, Road, SubDistrictID, DistrictID, ProvinceID, PostCode, Lat, `Long`, Telephone, IsActive, Remark, CreateTime,CreateBy,UpdateTime,UpdateBy ) VALUES (?,? OR NULL,? OR NULL,? OR NULL,?,?,?,?,? OR NULL,? OR NULL,? OR NULL,?,? OR NULL,?,?,?,?)"
+            // const insert_query = mysql.format(sqlInsert, [Name, AddrNo, Moo, Road, SubDistrictID, DistrictID, ProvinceID, PostCode, Lat, Long, Telephone, 'Y', Remark, dateTime, CreateBy,dateTime,UpdateBy ])
+            
+            const sqlInsert = "INSERT INTO locations (Name, AddrNo, Moo, Road, SubDistrictID, DistrictID, ProvinceID, PostCode, Lat, `Long`, Telephone, IsActive, Remark, CreateTime,UpdateTime ) VALUES (?,? OR NULL,? OR NULL,? OR NULL,?,?,?,?,? || NULL,? || NULL,? || NULL,?,? OR NULL,?,?)"
+            const insert_query = mysql.format(sqlInsert, [Name, AddrNo, Moo, Road, SubDistrictID, DistrictID, ProvinceID, PostCode, Lat, Long, Telephone, IsActive, Remark, dateTime,dateTime ])
 
 
             // ?? will be replaced by string
@@ -174,62 +193,56 @@ const addGreenhouses = async (req, res) => {
     }
 }
 
-const getGreenhouses = async (req, res) => {
-    connection.getConnection(async (err, connection) => {
-        if (err) throw (err)
-        const search_query = mysql.format("SELECT * FROM `greenhouses` WHERE IsActive = 'Y'")
-
-
-        await connection.query(search_query, async (err, result) => {
-            if (err) throw (err)
+const getGreenhouses = function (req, res) {
+    connection.query(
+        "SELECT * FROM `greenhouses` WHERE IsActive = 'Y'",
+        function (err, results) {
+            if (err) throw err;
             console.log("------> Search Greenhouses")
-            if (result.length == 0) {
-                connection.release()
-                console.log("------> Users already exists")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
                 //res.sendStatus(409) 
-                res.send({ success: false, message: 'ไม่มีข้อมูล!' })
+                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
             }
             else {
-
-                res.send({ result })
-
+                res.json(results)
             }
-        })
-    })
+            //res.json(results);
+            //console.log('OK')
+        }
+    );
 
 }
 
 //## Add Pots ##//
 const addPots = async (req, res) => {
-    const GreenHouseID = req.body.GreenHouseID;
+    const GreenHouseName = req.body.GreenHouseName;
     const CultivationID = req.body.CultivationID;
     const Name = req.body.Name;
     const Barcode = req.body.Barcode;
-    //const IsTestPot = req.body.IsTestPot;
+    const IsTestPot = req.body.IsTestPot;
     const Remark = req.body.Remark;
 
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
-    if (GreenHouseID && CultivationID && Name && Barcode) {
+    if (GreenHouseName && CultivationID && Name && Barcode) {
         connection.getConnection(async (err, connection) => {
             if (err) throw (err)
-            const sqlSearchGH = "SELECT * FROM greenhouses WHERE GreenHouseID = ?"
-            const searchGH_query = mysql.format(sqlSearchGH, [GreenHouseID])
+            const sqlSearchGH = "SELECT * FROM greenhouses WHERE Name = ?"
+            const searchGH_query = mysql.format(sqlSearchGH, [GreenHouseName])
 
             const sqlSearchCID = "SELECT * FROM cultivations WHERE CultivationID = ?"
             const searchCID_query = mysql.format(sqlSearchCID, [CultivationID])
 
-            const sqlInsert = "INSERT INTO pots (GreenHouseID,CultivationID,Name,Barcode, IsTestPot, Remark, CreateTime, UpdateTime) VALUES (?,?,?,?,?,? OR NULL,?,?)"
-            const insert_query = mysql.format(sqlInsert, [GreenHouseID, CultivationID, Name, Barcode, 'N', Remark, dateTime, dateTime])
-
-
+           
             // ?? will be replaced by string
-            connection.query(searchGH_query, async (err, result) => {
+            connection.query(searchGH_query, async (err, resultGH) => {
                 if (err)
                     throw (err);
                 console.log("------> Search Name GreenHouse");
-                console.log(result.length);
-                if (result.length == 0) {
+                console.log(resultGH.length);
+                if (resultGH.length == 0) {
                     connection.release();
                     console.log("------> exists");
                     //res.sendStatus(409) 
@@ -248,6 +261,11 @@ const addPots = async (req, res) => {
                             res.send({ success: false, message: 'ไม่พบรอบการปลูก' });
                         }
                         else {
+                            //console.log(resultGH[0]["GreenHouseID"])
+                            const sqlInsert = "INSERT INTO pots (GreenHouseID,CultivationID,Name,Barcode, IsTestPot, Remark, CreateTime, UpdateTime) VALUES (?,?,?,?,?,? OR NULL,?,?)"
+                            const insert_query = mysql.format(sqlInsert, [resultGH[0]["GreenHouseID"], CultivationID, Name, Barcode, IsTestPot, Remark, dateTime, dateTime])
+                
+                
                             connection.query(insert_query, async (err, result) => {
                                 if (err)
                                     throw (err);
@@ -267,27 +285,26 @@ const addPots = async (req, res) => {
 }
 
 
-const getStrains = async (req, res) => {
-    connection.getConnection(async (err, connection) => {
-        if (err) throw (err)
-        const search_query = mysql.format("SELECT * FROM `strains` WHERE IsActive = 'Y'")
-
-
-        await connection.query(search_query, async (err, result) => {
-            if (err) throw (err)
+const getStrains = function (req, res) {
+    connection.query(
+        "SELECT * FROM `strains` WHERE IsActive = 'Y' ",
+        function (err, results) {
+            if (err) throw err;
             console.log("------> Search Strains")
-            if (result.length == 0) {
-                connection.release()
-                console.log("------> Users already exists")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------>exists")
                 //res.sendStatus(409) 
-                res.send({ success: false, message: 'ไม่มีข้อมูล!' })
+                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
             }
             else {
-
-                res.send({ result })
+                res.json(results)
             }
-        })
-    })
+            //res.json(results);
+            //console.log('OK')
+        }
+    );
+
 
 }
 
@@ -295,6 +312,7 @@ const getStrains = async (req, res) => {
 const addInventorys = async (req, res) => {
     const Name = req.body.Name;
     const CommercialName = req.body.CommercialName;
+    const IsActive = req.body.IsActive;
 
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
@@ -305,7 +323,7 @@ const addInventorys = async (req, res) => {
             const search_query = mysql.format(sqlSearch, [Name])
 
             const sqlInsert = "INSERT INTO inventorys (Name,CommercialName,IsActive,CreateTime, UpdateTime) VALUES (?,? OR NULL,?,?,?)"
-            const insert_query = mysql.format(sqlInsert, [Name, CommercialName, 'Y', dateTime, dateTime])
+            const insert_query = mysql.format(sqlInsert, [Name, CommercialName, IsActive, dateTime, dateTime])
 
 
             // ?? will be replaced by string
@@ -313,7 +331,7 @@ const addInventorys = async (req, res) => {
                 if (err)
                     throw (err);
                 console.log("------> Search Name Inventorys");
-                console.log(result.length);
+                //console.log(result.length);
                 if (result.length != 0) {
                     connection.release();
                     console.log("------> exists");
@@ -338,39 +356,57 @@ const addInventorys = async (req, res) => {
     }
 }
 
+const getInventorys = function (req, res) {
+    connection.query(
+        "SELECT * FROM `inventorys` WHERE `IsActive`='y';",
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search Inventory")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------>exists")
+                //res.sendStatus(409) 
+                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        }
+    );
+
+
+}
+
 //## Add ChemicalUses ##//
 const addChemicalUses = async (req, res) => {
-    const InventoryID = req.body.InventoryID;
+    const InventoryName = req.body.InventoryName;
     const UseAmount = req.body.UseAmount;
     const Unit = req.body.Unit;
     const UseRemark = req.body.UseRemark;
     const PHI = req.body.PHI;
-    const GreenHouseID = req.body.GreenHouseID;
+    const GreenHouseName = req.body.GreenHouseName;
     const Remark = req.body.Remark;
 
 
-
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
-    if (InventoryID && GreenHouseID && UseAmount && Unit && UseRemark) {
+    if (InventoryName && GreenHouseName && UseAmount && Unit && UseRemark) {
         connection.getConnection(async (err, connection) => {
             if (err) throw (err)
-            const sqlSearchInven = "SELECT * FROM inventorys WHERE InventoryID = ?"
-            const searchInven_query = mysql.format(sqlSearchInven, [InventoryID])
+            const sqlSearchInven = "SELECT * FROM inventorys WHERE Name = ?"
+            const searchInven_query = mysql.format(sqlSearchInven, [InventoryName])
 
-            const sqlSearchGH = "SELECT * FROM greenhouses WHERE GreenHouseID = ?"
-            const searchGH_query = mysql.format(sqlSearchGH, [GreenHouseID])
-
-            const sqlInsert = "INSERT INTO chemical_uses (InventoryID,UseAmount,Unit,UseRemark,PHI,GreenHouseID,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,? OR NULL,?,? OR NULL,?,?)"
-            const insert_query = mysql.format(sqlInsert, [InventoryID, UseAmount, Unit, UseRemark, PHI, GreenHouseID, Remark, dateTime, dateTime])
-
+            const sqlSearchGH = "SELECT * FROM greenhouses WHERE Name = ?"
+            const searchGH_query = mysql.format(sqlSearchGH, [GreenHouseName])
 
             // ?? will be replaced by string
-            connection.query(searchInven_query, async (err, result) => {
+            connection.query(searchInven_query, async (err, resultInven) => {
                 if (err)
                     throw (err);
                 console.log("------> Search Name Inventorys");
-                console.log(result.length);
-                if (result.length == 0) {
+                //console.log(resultInven.length);
+                if (resultInven.length == 0) {
                     connection.release();
                     console.log("------> exists");
                     //res.sendStatus(409) 
@@ -381,7 +417,7 @@ const addChemicalUses = async (req, res) => {
                         if (err)
                             throw (err);
                         console.log("------> Search Name GreenHouses");
-                        console.log(result.length);
+                        //console.log(result.length);
                         if (result.length == 0) {
                             connection.release();
                             console.log("------> exists");
@@ -389,10 +425,14 @@ const addChemicalUses = async (req, res) => {
                             res.send({ success: false, message: 'ไม่พบข้อมูลโรงปลูก' });
                         }
                         else {
+                            // console.log(resultInven[0]["InventoryID"])
+                            // console.log(result[0]["GreenHouseID"])
+                            const sqlInsert = "INSERT INTO chemical_uses (InventoryID,UseAmount,Unit,UseRemark,PHI,GreenHouseID,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,?,?,? OR NULL,?,?)"
+                            const insert_query = mysql.format(sqlInsert, [resultInven[0]["InventoryID"], UseAmount, Unit, UseRemark, PHI + " " + TimeNow, result[0]["GreenHouseID"], Remark, dateTime, dateTime])
                             connection.query(insert_query, async (err, result) => {
                                 if (err)
                                     throw (err);
-
+                                console.log("-------->  The data was saved successfully.");
                                 res.send({ success: true, message: 'บันทึกข้อมูลเรียบร้อยแล้ว', ChemicalUseID: result.insertId });
 
                             });
@@ -409,6 +449,6 @@ const addChemicalUses = async (req, res) => {
     }
 }
 
-module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains }
+module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains ,getInventorys}
 
 

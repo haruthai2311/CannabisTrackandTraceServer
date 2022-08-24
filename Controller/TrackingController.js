@@ -262,6 +262,28 @@ const addHarvests = async (req, res) => {
     }
 }
 
+const getHarvests = function (req, res) {
+    connection.query(
+        "SELECT * FROM `harvests`",
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search Harvests ")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        }
+    );
+
+}
+
 //## Edit Harvests By HarvestID ##//
 const editHarvests = async (req, res) => {
     const HarvestID = req.body.HarvestID;
@@ -458,7 +480,7 @@ const addCultivations = async (req, res) => {
                 if (err)
                     throw (err);
                 console.log("------> Search Name GreenHouse");
-                console.log(resultGH.length);
+                //console.log(resultGH.length);
                 if (resultGH.length == 0) {
                     connection.release();
                     console.log("------> exists");
@@ -502,4 +524,50 @@ const addCultivations = async (req, res) => {
     }
 }
 
-module.exports = { addPlanttrackking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers ,addCultivations};
+const getCultivations = function (req, res) {
+    const NameGH = req.query.NameGH;
+    if(NameGH == null ){
+        connection.query(
+            "SELECT cultivations.*,greenhouses.Name FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID",
+            function (err, results) {
+                if (err) throw err;
+                console.log(NameGH)
+                console.log("------> Search Cultivations")
+                //console.log(results.length)
+                if (results.length == 0) {
+                    console.log("------> exists")
+                    //res.sendStatus(409) 
+                    res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+                }
+                else {
+                    res.json(results)
+                }
+                //res.json(results);
+                //console.log('OK')
+            },
+            );
+    
+    }else{
+    connection.query(
+        "SELECT cultivations.*,greenhouses.Name FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID WHERE greenhouses.Name = ?",[NameGH],
+        function (err, results) {
+            if (err) throw err;
+            console.log(NameGH)
+            console.log("------> Search Cultivations")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        },
+        );
+
+}}
+
+module.exports = { addPlanttrackking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers ,addCultivations,getCultivations,getHarvests};
