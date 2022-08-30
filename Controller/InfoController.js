@@ -24,8 +24,8 @@ const addStrains = async (req, res) => {
             const sqlSearch = "SELECT * FROM strains WHERE Name = ?"
             const search_query = mysql.format(sqlSearch, [Name])
 
-            const sqlInsert = "INSERT INTO strains (Name,ShortName,IsActive,Remark,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,? OR NULL,?,? OR NULL,?,?,?,?)"
-            const insert_query = mysql.format(sqlInsert, [Name, ShortName, IsActive, Remark, dateTime,CreateBy, dateTime,UpdateBy])
+            const sqlInsert = "INSERT INTO strains (Name,ShortName,IsActive,Remark,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?)"
+            const insert_query = mysql.format(sqlInsert, [Name, ShortName, IsActive, Remark, dateTime, CreateBy, dateTime, UpdateBy])
 
 
             // ?? will be replaced by string
@@ -72,11 +72,11 @@ const addLocations = async (req, res) => {
     const Telephone = req.body.Telephone;
     const Remark = req.body.Remark;
     const IsActive = req.body.IsActive;
-    //const CreateBy = req.body.CreateBy;
-    //const UpdateBy = req.body.UpdateBy
+    const CreateBy = req.body.CreateBy;
+    const UpdateBy = req.body.UpdateBy
 
- 
-//ได้แต่มันซับซ้อนเกินไป
+
+    //ได้แต่มันซับซ้อนเกินไป
     // if (typeof Lat === 'string' && Lat.trim().length === 0) {
     //     const lat ='NUL'
     //   console.log(lat);
@@ -95,9 +95,9 @@ const addLocations = async (req, res) => {
             console.log(dateTime)
             // const sqlInsert = "INSERT INTO locations (Name, AddrNo, Moo, Road, SubDistrictID, DistrictID, ProvinceID, PostCode, Lat, `Long`, Telephone, IsActive, Remark, CreateTime,CreateBy,UpdateTime,UpdateBy ) VALUES (?,? OR NULL,? OR NULL,? OR NULL,?,?,?,?,? OR NULL,? OR NULL,? OR NULL,?,? OR NULL,?,?,?,?)"
             // const insert_query = mysql.format(sqlInsert, [Name, AddrNo, Moo, Road, SubDistrictID, DistrictID, ProvinceID, PostCode, Lat, Long, Telephone, 'Y', Remark, dateTime, CreateBy,dateTime,UpdateBy ])
-            
-            const sqlInsert = "INSERT INTO locations (Name, AddrNo, Moo, Road, SubDistrictID, DistrictID, ProvinceID, PostCode, Lat, `Long`, Telephone, IsActive, Remark, CreateTime,UpdateTime ) VALUES (?,? OR NULL,? OR NULL,? OR NULL,?,?,?,?,? || NULL,? || NULL,? || NULL,?,? OR NULL,?,?)"
-            const insert_query = mysql.format(sqlInsert, [Name, AddrNo, Moo, Road, SubDistrictID, DistrictID, ProvinceID, PostCode, Lat, Long, Telephone, IsActive, Remark, dateTime,dateTime ])
+
+            const sqlInsert = "INSERT INTO locations (Name, AddrNo, Moo, Road, SubDistrictID, DistrictID, ProvinceID, PostCode, Lat, `Long`, Telephone, IsActive, Remark, CreateTime,CreateBy,UpdateTime,UpdateBy ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+            const insert_query = mysql.format(sqlInsert, [Name, AddrNo, Moo, Road, SubDistrictID, DistrictID, ProvinceID, PostCode, Lat, Long, Telephone, IsActive, Remark, dateTime, CreateBy, dateTime, UpdateBy])
 
 
             // ?? will be replaced by string
@@ -134,6 +134,7 @@ const addGreenhouses = async (req, res) => {
     const LocationID = req.body.LocationID;
     const Name = req.body.Name;
     const Remark = req.body.Remark;
+    const IsActive = req.body.IsActive;
 
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
@@ -146,8 +147,8 @@ const addGreenhouses = async (req, res) => {
             const sqlSearchName = "SELECT * FROM greenhouses WHERE Name = ?"
             const searchName_query = mysql.format(sqlSearchName, [Name])
 
-            const sqlInsert = "INSERT INTO greenhouses (locationID,Name, IsActive, Remark, CreateTime, UpdateTime) VALUES (?,?,?,? OR NULL,?,?)"
-            const insert_query = mysql.format(sqlInsert, [LocationID, Name, 'Y', Remark, dateTime, dateTime])
+            const sqlInsert = "INSERT INTO greenhouses (locationID,Name, IsActive, Remark, CreateTime, UpdateTime) VALUES (?,?,?,?,?,?)"
+            const insert_query = mysql.format(sqlInsert, [LocationID, Name, IsActive, Remark, dateTime, dateTime])
 
 
             // ?? will be replaced by string
@@ -163,7 +164,7 @@ const addGreenhouses = async (req, res) => {
                     res.send({ success: false, message: 'ไม่พบสถานที่' });
                 }
                 else {
-                    connection.query(search_query, async (err, result) => {
+                    connection.query(searchName_query, async (err, result) => {
                         if (err)
                             throw (err);
                         console.log("------> Search Name Location");
@@ -223,6 +224,8 @@ const addPots = async (req, res) => {
     const Barcode = req.body.Barcode;
     const IsTestPot = req.body.IsTestPot;
     const Remark = req.body.Remark;
+    const CreateBy = req.body.CreateBy;
+    const UpdateBy = req.body.UpdateBy;
 
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
@@ -235,7 +238,7 @@ const addPots = async (req, res) => {
             const sqlSearchCID = "SELECT * FROM cultivations WHERE CultivationID = ?"
             const searchCID_query = mysql.format(sqlSearchCID, [CultivationID])
 
-           
+
             // ?? will be replaced by string
             connection.query(searchGH_query, async (err, resultGH) => {
                 if (err)
@@ -262,10 +265,10 @@ const addPots = async (req, res) => {
                         }
                         else {
                             //console.log(resultGH[0]["GreenHouseID"])
-                            const sqlInsert = "INSERT INTO pots (GreenHouseID,CultivationID,Name,Barcode, IsTestPot, Remark, CreateTime, UpdateTime) VALUES (?,?,?,?,?,? OR NULL,?,?)"
-                            const insert_query = mysql.format(sqlInsert, [resultGH[0]["GreenHouseID"], CultivationID, Name, Barcode, IsTestPot, Remark, dateTime, dateTime])
-                
-                
+                            const sqlInsert = "INSERT INTO pots (GreenHouseID,CultivationID,Name,Barcode, IsTestPot, Remark, CreateTime,CreateBy, UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?)"
+                            const insert_query = mysql.format(sqlInsert, [resultGH[0]["GreenHouseID"], CultivationID, Name, Barcode, IsTestPot, Remark, dateTime,CreateBy, dateTime,UpdateBy])
+
+
                             connection.query(insert_query, async (err, result) => {
                                 if (err)
                                     throw (err);
@@ -313,6 +316,8 @@ const addInventorys = async (req, res) => {
     const Name = req.body.Name;
     const CommercialName = req.body.CommercialName;
     const IsActive = req.body.IsActive;
+    const CreateBy = req.body.CreateBy;
+    const UpdateBy = req.body.UpdateBy;
 
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
@@ -322,8 +327,8 @@ const addInventorys = async (req, res) => {
             const sqlSearch = "SELECT * FROM inventorys WHERE Name = ?"
             const search_query = mysql.format(sqlSearch, [Name])
 
-            const sqlInsert = "INSERT INTO inventorys (Name,CommercialName,IsActive,CreateTime, UpdateTime) VALUES (?,? OR NULL,?,?,?)"
-            const insert_query = mysql.format(sqlInsert, [Name, CommercialName, IsActive, dateTime, dateTime])
+            const sqlInsert = "INSERT INTO inventorys (Name,CommercialName,IsActive,CreateTime,CreateBy, UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?)"
+            const insert_query = mysql.format(sqlInsert, [Name, CommercialName, IsActive, dateTime, CreateBy, dateTime, UpdateBy])
 
 
             // ?? will be replaced by string
@@ -388,6 +393,9 @@ const addChemicalUses = async (req, res) => {
     const PHI = req.body.PHI;
     const GreenHouseName = req.body.GreenHouseName;
     const Remark = req.body.Remark;
+    const CreateBy = req.body.CreateBy;
+    const UpdateBy = req.body.UpdateBy;
+
 
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
@@ -427,8 +435,8 @@ const addChemicalUses = async (req, res) => {
                         else {
                             // console.log(resultInven[0]["InventoryID"])
                             // console.log(result[0]["GreenHouseID"])
-                            const sqlInsert = "INSERT INTO chemical_uses (InventoryID,UseAmount,Unit,UseRemark,PHI,GreenHouseID,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,?,?,? OR NULL,?,?)"
-                            const insert_query = mysql.format(sqlInsert, [resultInven[0]["InventoryID"], UseAmount, Unit, UseRemark, PHI + " " + TimeNow, result[0]["GreenHouseID"], Remark, dateTime, dateTime])
+                            const sqlInsert = "INSERT INTO chemical_uses (InventoryID,UseAmount,Unit,UseRemark,PHI,GreenHouseID,Remark,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
+                            const insert_query = mysql.format(sqlInsert, [resultInven[0]["InventoryID"], UseAmount, Unit, UseRemark, PHI + " " + TimeNow, result[0]["GreenHouseID"], Remark, dateTime, CreateBy, dateTime, UpdateBy])
                             connection.query(insert_query, async (err, result) => {
                                 if (err)
                                     throw (err);
@@ -449,6 +457,6 @@ const addChemicalUses = async (req, res) => {
     }
 }
 
-module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains ,getInventorys}
+module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains, getInventorys }
 
 

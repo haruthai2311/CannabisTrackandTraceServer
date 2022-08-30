@@ -24,6 +24,10 @@ app.use('/informations', RouteInformations)
 const Time = require('./Controller/dateTime')
 console.log(Time.dateTime);
 
+const UploadRouter = require('./Routes/RouteUpload')
+app.use('/upload', UploadRouter)
+
+app.use(express.static('assets/ImagesUploaded'))
 
 app.listen(3000, () => console.log('Server is running on port 3000!'));
 

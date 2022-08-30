@@ -26,6 +26,8 @@ const addPlanttrackking = async (req, res) => {
     const LogTime = req.body.LogTime;
     const TrashRemark = req.body.TrashRemark;
     const RemarkTrash_log = req.body.RemarkTrash_log;
+    const CreateBy = req.body.CreateBy;
+    const UpdateBy = req.body.UpdateBy;
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
     if (
@@ -50,7 +52,7 @@ const addPlanttrackking = async (req, res) => {
             //const sqlInsertPlantTracking = "INSERT INTO plant_trackings (PotID,CheckDate,PlantStatus,SoilMoisture,SoilRemark,Remark,CreateTime,CreateBy,CreateTime,UpdateTime,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
             //เหลือรูปกับ Update By ,Create By
             const sqlInsertPlantTracking =
-                "INSERT INTO plant_trackings (PotID,CheckDate,PlantStatus,SoilMoisture,SoilRemark,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,? OR NULL,? OR NULL,?,?)";
+                "INSERT INTO plant_trackings (PotID,CheckDate,PlantStatus,SoilMoisture,SoilRemark,Remark,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?)";
             const insertPlantTracking_query = mysql.format(sqlInsertPlantTracking, [
                 PotID,
                 CheckDateTime,
@@ -58,8 +60,8 @@ const addPlanttrackking = async (req, res) => {
                 SoilMoisture,
                 SoilRemark,
                 Remark,
-                dateTime,
-                dateTime,
+                dateTime, CreateBy,
+                dateTime, UpdateBy
             ]);
 
             // ? will be replaced by values
@@ -91,27 +93,42 @@ const addPlanttrackking = async (req, res) => {
                                     if (err) throw err;
                                     console.log("--------> The data was saved successfully.");
                                     console.log(result.insertId);
+
+                                    //disease_logs
                                     const sqlInsertdisease_logs =
-                                        "INSERT INTO disease_logs (PlantTrackingID,Disease,Fix,CreateTime,UpdateTime) VALUES (?,?,?,?,?)";
+                                        "INSERT INTO disease_logs (PlantTrackingID,Disease,Fix,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?)";
                                     const insertdiseaselogs_query = mysql.format(
                                         sqlInsertdisease_logs,
-                                        [result.insertId, Disease, FixDisease, dateTime, dateTime]
+                                        [result.insertId, Disease, FixDisease, dateTime, CreateBy, dateTime, UpdateBy]
                                     );
                                     connection.query(insertdiseaselogs_query);
+
+                                    //insect_logs
                                     const sqlInsertinsect_logs =
-                                        "INSERT INTO insect_logs (PlantTrackingID,Insect,Fix,CreateTime,UpdateTime) VALUES (?,?,?,?,?)";
+                                        "INSERT INTO insect_logs (PlantTrackingID,Insect,Fix,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?)";
                                     const insertinsectlogs_query = mysql.format(
                                         sqlInsertinsect_logs,
-                                        [result.insertId, Insect, FixInsect, dateTime, dateTime]
+                                        [result.insertId, Insect, FixInsect, dateTime, CreateBy, dateTime, UpdateBy]
                                     );
                                     connection.query(insertinsectlogs_query);
+
+                                    //trash_logs
                                     const sqlInserttrash_logs =
-                                        "INSERT INTO trash_logs (PlantTrackingID,Weight,LogTime,TrashRemark,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,? OR NULL,?,?)";
+                                        "INSERT INTO trash_logs (PlantTrackingID,Weight,LogTime,TrashRemark,Remark,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?)";
                                     const inserttrashlogssquery = mysql.format(
                                         sqlInserttrash_logs,
-                                        [result.insertId, Weight, LogTime, TrashRemark, RemarkTrash_log, dateTime, dateTime]
+                                        [result.insertId, Weight, LogTime+" "+TimeNow, TrashRemark, RemarkTrash_log, dateTime, CreateBy, dateTime, UpdateBy]
                                     );
                                     connection.query(inserttrashlogssquery);
+
+                                    //image_logs
+                                    const sqlInsertimage_logs =
+                                        "INSERT INTO image_logs (PlantTrackingID,FileName,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?)";
+                                    const insertimage_logsquery = mysql.format(
+                                        sqlInsertimage_logs,
+                                        [result.insertId, ImageFileName, dateTime, CreateBy, dateTime, UpdateBy]
+                                    );
+                                    connection.query(insertimage_logsquery);
 
                                     res.send({
                                         success: true,
@@ -152,7 +169,7 @@ const editPlanttracking = async (req, res) => {
         const sqlSearch = "SELECT * FROM plant_trackings WHERE PlantTrackingID = ?";
         const search_query = mysql.format(sqlSearch, [PlantTrackingID]);
         const sqlUpdate =
-            "UPDATE plant_trackings SET PlantStatus = ?, SoilMoisture = ?,SoilRemark = ? OR NULL,Remark = ? OR NULL,UpdateTime = ?  WHERE PlantTrackingID = ?";
+            "UPDATE plant_trackings SET PlantStatus = ?, SoilMoisture = ?,SoilRemark = ?,Remark = ?,UpdateTime = ?  WHERE PlantTrackingID = ?";
         const update_query = mysql.format(sqlUpdate, [
             PlantStatus,
             SoilMoisture,
@@ -212,6 +229,8 @@ const addHarvests = async (req, res) => {
     const Weight = req.body.Weight;
     const LotNo = req.body.LotNo;
     const Remark = req.body.Remark;
+    const CreateBy = req.body.CreateBy;
+    const UpdateBy = req.body.UpdateBy;
 
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
@@ -239,8 +258,8 @@ const addHarvests = async (req, res) => {
                 }
                 else {
                     //console.log(result[0]["GreenHouseID"])
-                    const sqlInsert = "INSERT INTO harvests (GreenHouseID,HarvestDate,HarvestNo,Type,Weight,LotNo,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,?,?,? OR NULL,?,?)"
-                    const insert_query = mysql.format(sqlInsert, [result[0]["GreenHouseID"], HarvestDate + " " + TimeNow, HarvestNo, Type, Weight, LotNo, Remark, dateTime, dateTime])
+                    const sqlInsert = "INSERT INTO harvests (GreenHouseID,HarvestDate,HarvestNo,Type,Weight,LotNo,Remark,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
+                    const insert_query = mysql.format(sqlInsert, [result[0]["GreenHouseID"], HarvestDate + " " + TimeNow, HarvestNo, Type, Weight, LotNo, Remark, dateTime, CreateBy, dateTime, UpdateBy])
 
                     await connection.query(insert_query, (err, result) => {
                         connection.release();
@@ -302,7 +321,7 @@ const editHarvests = async (req, res) => {
         const search_query = mysql.format(sqlSearch, [HarvestID])
 
 
-        const sqlUpdate = "UPDATE harvests SET HarvestDate = ?, HarvestNo = ?,Type = ?,Weight = ?, LotNo = ?,Remark=? OR NULL , UpdateTime=?  WHERE  HarvestID = ?"
+        const sqlUpdate = "UPDATE harvests SET HarvestDate = ?, HarvestNo = ?,Type = ?,Weight = ?, LotNo = ?,Remark=?, UpdateTime=?  WHERE  HarvestID = ?"
         const Update_query = mysql.format(sqlUpdate, [HarvestDate + " " + TimeNow, HarvestNo, Type, Weight, LotNo, Remark, dateTime, HarvestID])
 
 
@@ -348,6 +367,8 @@ const addTransfers = async (req, res) => {
     const LicenseNo = req.body.LicenseNo;
     const LicensePlate = req.body.LicensePlate;
     const Remark = req.body.Remark;
+    const CreateBy = req.body.CreateBy;
+    const UpdateBy = req.body.UpdateBy;
 
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
@@ -357,8 +378,8 @@ const addTransfers = async (req, res) => {
             const sqlSearch = "SELECT * FROM harvests WHERE HarvestID = ?"
             const search_query = mysql.format(sqlSearch, [HarvestID])
 
-            const sqlInsert = "INSERT INTO transfers (HarvestID,TransferDate,Type,Weight,LotNo,GetByName,GetByPlace,LicenseNo,LicensePlate,Remark,CreateTime,UpdateTime) VALUES (?,?,?,?,?,?,?,? OR NULL,? OR NULL,? OR NULL,?,?)"
-            const insert_query = mysql.format(sqlInsert, [HarvestID, TransferDate + " " + TimeNow, Type, Weight, LotNo, GetByName, GetByPlace, LicenseNo, LicensePlate, Remark, dateTime, dateTime])
+            const sqlInsert = "INSERT INTO transfers (HarvestID,TransferDate,Type,Weight,LotNo,GetByName,GetByPlace,LicenseNo,LicensePlate,Remark,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+            const insert_query = mysql.format(sqlInsert, [HarvestID, TransferDate + " " + TimeNow, Type, Weight, LotNo, GetByName, GetByPlace, LicenseNo, LicensePlate, Remark, dateTime, CreateBy, dateTime, UpdateBy])
 
 
             // ? will be replaced by values
@@ -414,7 +435,7 @@ const editTransfers = async (req, res) => {
         const sqlSearch = "SELECT * FROM transfers WHERE TransferID = ?"
         const search_query = mysql.format(sqlSearch, [TransferID])
 
-        const sqlUpdate = "UPDATE transfers SET TransferDate=?,Type=?,Weight=?,LotNo=?,GetByName=?,GetByPlace=?,LicenseNo=? OR NULL,LicensePlate=? OR NULL,Remark=? OR NULL,UpdateTime=? WHERE  TransferID = ?"
+        const sqlUpdate = "UPDATE transfers SET TransferDate=?,Type=?,Weight=?,LotNo=?,GetByName=?,GetByPlace=?,LicenseNo=?,LicensePlate=?,Remark=?,UpdateTime=? WHERE  TransferID = ?"
         const Update_query = mysql.format(sqlUpdate, [TransferDate + " " + TimeNow, Type, Weight, LotNo, GetByName, GetByPlace, LicenseNo, LicensePlate, Remark, dateTime, TransferID])
 
 
@@ -461,6 +482,8 @@ const addCultivations = async (req, res) => {
     const PlantLive = req.body.PlantLive;
     const PlantDead = req.body.PlantDead;
     const Remark = req.body.Remark;
+    const CreateBy = req.body.CreateBy;
+    const UpdateBy = req.body.UpdateBy;
 
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
@@ -473,7 +496,7 @@ const addCultivations = async (req, res) => {
             const sqlSearchStrain = "SELECT * FROM strains WHERE Name = ?"
             const searchStrain_query = mysql.format(sqlSearchStrain, [StrainName])
 
-          
+
 
             // ?? will be replaced by string
             connection.query(searchGH_query, async (err, resultGH) => {
@@ -502,9 +525,9 @@ const addCultivations = async (req, res) => {
                         else {
                             //console.log(resultGH[0]["GreenHouseID"])
                             //console.log(result[0]["StrainID"])
-                            const sqlInsert = "INSERT INTO cultivations (GreenHouseID,StrainID,No,SeedDate,MoveDate,SeedTotal,SeedNet,PlantTotal,PlantLive,PlantDead,Remark,CreateTime, UpdateTime) VALUES (?,?,?,?,?,?,?,?,?,?,? OR NULL,?,?)"
-                            const insert_query = mysql.format(sqlInsert, [resultGH[0]["GreenHouseID"], result[0]["StrainID"], No, SeedDate + " " + TimeNow, MoveDate + " " + TimeNow, SeedTotal, SeedNet, PlantTotal, PlantLive, PlantDead, Remark, dateTime, dateTime])
-                
+                            const sqlInsert = "INSERT INTO cultivations (GreenHouseID,StrainID,No,SeedDate,MoveDate,SeedTotal,SeedNet,PlantTotal,PlantLive,PlantDead,Remark,CreateTime,CreateBy ,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+                            const insert_query = mysql.format(sqlInsert, [resultGH[0]["GreenHouseID"], result[0]["StrainID"], No, SeedDate + " " + TimeNow, MoveDate + " " + TimeNow, SeedTotal, SeedNet, PlantTotal, PlantLive, PlantDead, Remark, dateTime, CreateBy, dateTime, UpdateBy])
+
                             connection.query(insert_query, async (err, result) => {
                                 if (err)
                                     throw (err);
@@ -526,7 +549,7 @@ const addCultivations = async (req, res) => {
 
 const getCultivations = function (req, res) {
     const NameGH = req.query.NameGH;
-    if(NameGH == null ){
+    if (NameGH == null) {
         connection.query(
             "SELECT cultivations.*,greenhouses.Name FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID",
             function (err, results) {
@@ -545,29 +568,30 @@ const getCultivations = function (req, res) {
                 //res.json(results);
                 //console.log('OK')
             },
-            );
-    
-    }else{
-    connection.query(
-        "SELECT cultivations.*,greenhouses.Name FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID WHERE greenhouses.Name = ?",[NameGH],
-        function (err, results) {
-            if (err) throw err;
-            console.log(NameGH)
-            console.log("------> Search Cultivations")
-            //console.log(results.length)
-            if (results.length == 0) {
-                console.log("------> exists")
-                //res.sendStatus(409) 
-                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
-            }
-            else {
-                res.json(results)
-            }
-            //res.json(results);
-            //console.log('OK')
-        },
         );
 
-}}
+    } else {
+        connection.query(
+            "SELECT cultivations.*,greenhouses.Name FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID WHERE greenhouses.Name = ?", [NameGH],
+            function (err, results) {
+                if (err) throw err;
+                console.log(NameGH)
+                console.log("------> Search Cultivations")
+                //console.log(results.length)
+                if (results.length == 0) {
+                    console.log("------> exists")
+                    //res.sendStatus(409) 
+                    res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+                }
+                else {
+                    res.json(results)
+                }
+                //res.json(results);
+                //console.log('OK')
+            },
+        );
 
-module.exports = { addPlanttrackking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers ,addCultivations,getCultivations,getHarvests};
+    }
+}
+
+module.exports = { addPlanttrackking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers, addCultivations, getCultivations, getHarvests };
