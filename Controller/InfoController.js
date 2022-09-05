@@ -287,6 +287,31 @@ const addPots = async (req, res) => {
     }
 }
 
+const getPots = function (req, res) {
+    const NameGH = req.query.NameGH;
+    
+        connection.query(
+            "SELECT pots.*,greenhouses.Name FROM pots INNER JOIN greenhouses ON pots.GreenHouseID=greenhouses.GreenHouseID WHERE greenhouses.Name = ?", [NameGH],
+            function (err, results) {
+                if (err) throw err;
+                console.log(NameGH)
+                console.log("------> Search Pots")
+                //console.log(results.length)
+                if (results.length == 0) {
+                    console.log("------> exists")
+                    //res.sendStatus(409) 
+                    res.json(results)
+                }
+                else {
+                    res.json(results)
+                }
+                //res.json(results);
+                //console.log('OK')
+            },
+        );
+
+   
+}
 
 const getStrains = function (req, res) {
     connection.query(
@@ -296,9 +321,9 @@ const getStrains = function (req, res) {
             console.log("------> Search Strains")
             //console.log(results.length)
             if (results.length == 0) {
-                console.log("------>exists")
+                console.log("------>ไม่มีข้อมูล")
                 //res.sendStatus(409) 
-                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+                res.json(results)
             }
             else {
                 res.json(results)
@@ -371,7 +396,7 @@ const getInventorys = function (req, res) {
             if (results.length == 0) {
                 console.log("------>exists")
                 //res.sendStatus(409) 
-                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+                res.json(results)
             }
             else {
                 res.json(results)
@@ -457,6 +482,6 @@ const addChemicalUses = async (req, res) => {
     }
 }
 
-module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains, getInventorys }
+module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains, getInventorys ,getPots}
 
 

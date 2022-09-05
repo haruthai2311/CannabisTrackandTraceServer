@@ -207,7 +207,7 @@ const getUsers = function (req, res) {
             if (results.length == 0) {
                 console.log("------> Users already exists")
                 //res.sendStatus(409) 
-                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+                res.json(results)
             }
             else {
                 console.log("------> Search Users")

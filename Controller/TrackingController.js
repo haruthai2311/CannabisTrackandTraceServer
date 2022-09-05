@@ -8,7 +8,7 @@ const dateTime = Time.dateTime
 const TimeNow = Time.TimeNow
 
 //## Add PlantTrackings ##//
-const addPlanttrackking = async (req, res) => {
+const addPlanttracking = async (req, res) => {
     const nameGreenHouse = req.body.nameGreenHouse;
     const CheckDate = req.body.CheckDate;
     const PotID = req.body.PotID;
@@ -117,7 +117,7 @@ const addPlanttrackking = async (req, res) => {
                                         "INSERT INTO trash_logs (PlantTrackingID,Weight,LogTime,TrashRemark,Remark,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?)";
                                     const inserttrashlogssquery = mysql.format(
                                         sqlInserttrash_logs,
-                                        [result.insertId, Weight, LogTime+" "+TimeNow, TrashRemark, RemarkTrash_log, dateTime, CreateBy, dateTime, UpdateBy]
+                                        [result.insertId, Weight, LogTime + " " + TimeNow, TrashRemark, RemarkTrash_log, dateTime, CreateBy, dateTime, UpdateBy]
                                     );
                                     connection.query(inserttrashlogssquery);
 
@@ -148,6 +148,58 @@ const addPlanttrackking = async (req, res) => {
     }
 };
 
+const getPlanttracking = function (req, res) {
+    const Barcode = req.query.Barcode;
+
+    connection.query(
+        "SELECT p.PlantTrackingID,p.CheckDate,p.PlantStatus,p.SoilMoisture,p.SoilRemark,p.Remark,im.ImageID,im.FileName,d.DiseaseLogID,d.Disease,d.Fix FixDisease,i.InsectLogID,i.Insect,i.Fix FixInsect,t.TrashLogID,t.Weight,t.LogTime,t.TrashRemark,t.Remark,pots.PotID,pots.Name potsName,pots.GreenHouseID,g.Name GHName,pots.CultivationID,c.No,pots.Barcode,pots.IsTestPot,pots.Remark FROM plant_trackings p,image_logs im,disease_logs d,insect_logs i,trash_logs t,pots,greenhouses g,cultivations c WHERE p.PlantTrackingID=im.PlantTrackingID AND  p.PlantTrackingID=d.PlantTrackingID AND  p.PlantTrackingID=i.PlantTrackingID AND p.PlantTrackingID=t.PlantTrackingID AND pots.GreenHouseID = g.GreenHouseID AND c.CultivationID=pots.CultivationID AND p.PotID = pots.PotID AND pots.Barcode = ?", [Barcode],
+        function (err, results) {
+            if (err) throw err;
+            console.log(Barcode)
+            console.log("------> Search Planttracking")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        },
+    );
+
+
+}
+
+const getPlanttrackingbyid = function (req, res) {
+    const id = req.query.id;
+
+    connection.query(
+        "SELECT p.PlantTrackingID,p.CheckDate,p.PlantStatus,p.SoilMoisture,p.SoilRemark,p.Remark,im.ImageID,im.FileName,d.DiseaseLogID,d.Disease,d.Fix FixDisease,i.InsectLogID,i.Insect,i.Fix FixInsect,t.TrashLogID,t.Weight,t.LogTime,t.TrashRemark,t.Remark,pots.PotID,pots.Name potsName,pots.GreenHouseID,g.Name GHName,pots.CultivationID,c.No,pots.Barcode,pots.IsTestPot,pots.Remark FROM plant_trackings p,image_logs im,disease_logs d,insect_logs i,trash_logs t,pots,greenhouses g,cultivations c WHERE p.PlantTrackingID=im.PlantTrackingID AND  p.PlantTrackingID=d.PlantTrackingID AND  p.PlantTrackingID=i.PlantTrackingID AND p.PlantTrackingID=t.PlantTrackingID AND pots.GreenHouseID = g.GreenHouseID AND c.CultivationID=pots.CultivationID AND p.PotID = pots.PotID AND p.PlantTrackingID = ?", [id],
+        function (err, results) {
+            if (err) throw err;
+
+            console.log("------> Search Planttracking")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        },
+    );
+
+
+}
+
 //## Edit PlantTrackings By PlantTrackingID ##//
 const editPlanttracking = async (req, res) => {
     const PlantTrackingID = req.body.PlantTrackingID;
@@ -160,8 +212,12 @@ const editPlanttracking = async (req, res) => {
     const Insect = req.body.Insect;
     const FixInsect = req.body.FixInsect;
     const ImageFileName = req.body.ImageFileName;
-    //const Password = req.body.password;
-    //const confirmPassword = req.body.confirmPassword;
+    //const CheckDateTime = CheckDate + " " + TimeNow;
+    const Weight = req.body.Weight;
+    const LogTime = req.body.LogTime;
+    const TrashRemark = req.body.TrashRemark;
+    const RemarkTrash_log = req.body.RemarkTrash_log;
+    const UpdateBy = req.body.UpdateBy;
 
     //console.log(dateTime);
     connection.getConnection(async (err, connection) => {
@@ -169,13 +225,14 @@ const editPlanttracking = async (req, res) => {
         const sqlSearch = "SELECT * FROM plant_trackings WHERE PlantTrackingID = ?";
         const search_query = mysql.format(sqlSearch, [PlantTrackingID]);
         const sqlUpdate =
-            "UPDATE plant_trackings SET PlantStatus = ?, SoilMoisture = ?,SoilRemark = ?,Remark = ?,UpdateTime = ?  WHERE PlantTrackingID = ?";
+            "UPDATE plant_trackings SET PlantStatus = ?, SoilMoisture = ?,SoilRemark = ?,Remark = ?,UpdateTime = ? ,UpdateBy = ? WHERE PlantTrackingID = ?";
         const update_query = mysql.format(sqlUpdate, [
             PlantStatus,
             SoilMoisture,
             SoilRemark,
             Remark,
             dateTime,
+            UpdateBy,
             PlantTrackingID,
         ]);
         // ? will be replaced by values
@@ -193,24 +250,57 @@ const editPlanttracking = async (req, res) => {
                     connection.release();
                     if (err) throw err;
                     console.log("--------> Update PlantTracking");
+
+
+                    //disease_logs
                     const sqlUpdatedisease_logs =
-                        "UPDATE disease_logs SET Disease = ?, Fix = ?,UpdateTime = ?  WHERE PlantTrackingID = ?";
+                        "UPDATE disease_logs SET Disease = ?, Fix = ?,UpdateTime = ?,UpdateBy = ?  WHERE PlantTrackingID = ?";
                     const Updatediseaselogs_query = mysql.format(sqlUpdatedisease_logs, [
                         Disease,
                         FixDisease,
                         dateTime,
+                        UpdateBy,
                         PlantTrackingID,
                     ]);
                     connection.query(Updatediseaselogs_query);
+
+                    //insect_logs
                     const sqlUpdateinsect_logs =
-                        "UPDATE insect_logs SET Insect = ?, Fix = ?,UpdateTime = ?  WHERE PlantTrackingID = ?";
+                        "UPDATE insect_logs SET Insect = ?, Fix = ?,UpdateTime = ? ,UpdateBy = ? WHERE PlantTrackingID = ?";
                     const Updateinsectlogs_query = mysql.format(sqlUpdateinsect_logs, [
                         Insect,
                         FixInsect,
                         dateTime,
+                        UpdateBy,
                         PlantTrackingID,
                     ]);
                     connection.query(Updateinsectlogs_query);
+
+
+                    //trash_logs
+                    const sqlUpdatetrash_logs =
+                        "UPDATE trash_logs SET Weight = ?, LogTime = ?,TrashRemark = ?,Remark = ?,UpdateTime = ? ,UpdateBy=? WHERE PlantTrackingID = ?";
+                    const Updatetrashlogs_query = mysql.format(sqlUpdatetrash_logs, [
+                        Weight,
+                        LogTime,
+                        TrashRemark,
+                        RemarkTrash_log,
+                        dateTime,
+                        UpdateBy,
+                        PlantTrackingID,
+                    ]);
+                    connection.query(Updatetrashlogs_query);
+
+                    //image_logs
+                    const sqlUpdateimage_logs =
+                        "UPDATE image_logs SET FileName = ?, UpdateTime = ?,UpdateBy = ?  WHERE PlantTrackingID = ?";
+                    const Updateimagelogs_query = mysql.format(sqlUpdateimage_logs, [
+                        ImageFileName,
+                        dateTime,
+                        UpdateBy,
+                        PlantTrackingID,
+                    ]);
+                    connection.query(Updateimagelogs_query);
 
                     //res.sendStatus(201)
                     res.send({ success: true, message: "แก้ไขข้อมูลเรียบร้อยแล้ว" });
@@ -291,7 +381,7 @@ const getHarvests = function (req, res) {
             if (results.length == 0) {
                 console.log("------> exists")
                 //res.sendStatus(409) 
-                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+                res.json(results)
             }
             else {
                 res.json(results)
@@ -549,49 +639,28 @@ const addCultivations = async (req, res) => {
 
 const getCultivations = function (req, res) {
     const NameGH = req.query.NameGH;
-    if (NameGH == null) {
-        connection.query(
-            "SELECT cultivations.*,greenhouses.Name FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID",
-            function (err, results) {
-                if (err) throw err;
-                console.log(NameGH)
-                console.log("------> Search Cultivations")
-                //console.log(results.length)
-                if (results.length == 0) {
-                    console.log("------> exists")
-                    //res.sendStatus(409) 
-                    res.json({ success: false, message: 'ไม่มีข้อมูล!' })
-                }
-                else {
-                    res.json(results)
-                }
-                //res.json(results);
-                //console.log('OK')
-            },
-        );
 
-    } else {
-        connection.query(
-            "SELECT cultivations.*,greenhouses.Name FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID WHERE greenhouses.Name = ?", [NameGH],
-            function (err, results) {
-                if (err) throw err;
-                console.log(NameGH)
-                console.log("------> Search Cultivations")
-                //console.log(results.length)
-                if (results.length == 0) {
-                    console.log("------> exists")
-                    //res.sendStatus(409) 
-                    res.json({ success: false, message: 'ไม่มีข้อมูล!' })
-                }
-                else {
-                    res.json(results)
-                }
-                //res.json(results);
-                //console.log('OK')
-            },
-        );
+    connection.query(
+        "SELECT cultivations.*,greenhouses.Name FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID WHERE greenhouses.Name = ?", [NameGH],
+        function (err, results) {
+            if (err) throw err;
+            console.log(NameGH)
+            console.log("------> Search Cultivations")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        },
+    );
 
-    }
+
 }
 
-module.exports = { addPlanttrackking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers, addCultivations, getCultivations, getHarvests };
+module.exports = { addPlanttracking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers, addCultivations, getCultivations, getHarvests, getPlanttracking, getPlanttrackingbyid };

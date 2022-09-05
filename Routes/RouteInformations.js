@@ -16,6 +16,7 @@ RouteInformations.get("/getAllGreenhouses", Infocontroller.getGreenhouses)
 
 
 RouteInformations.post("/addPots", Infocontroller.addPots)
+RouteInformations.get("/getPots",Infocontroller.getPots);
 
 
 RouteInformations.post("/addInventorys", Infocontroller.addInventorys)
