@@ -214,7 +214,7 @@ const editPlanttracking = async (req, res) => {
     const ImageFileName = req.body.ImageFileName;
     //const CheckDateTime = CheckDate + " " + TimeNow;
     const Weight = req.body.Weight;
-    const LogTime = req.body.LogTime;
+    //const LogTime = req.body.LogTime;
     const TrashRemark = req.body.TrashRemark;
     const RemarkTrash_log = req.body.RemarkTrash_log;
     const UpdateBy = req.body.UpdateBy;
@@ -277,12 +277,11 @@ const editPlanttracking = async (req, res) => {
                     connection.query(Updateinsectlogs_query);
 
 
-                    //trash_logs
+                    //trash_logs Remark = ?
                     const sqlUpdatetrash_logs =
-                        "UPDATE trash_logs SET Weight = ?, LogTime = ?,TrashRemark = ?,Remark = ?,UpdateTime = ? ,UpdateBy=? WHERE PlantTrackingID = ?";
+                        "UPDATE trash_logs SET Weight = ?,TrashRemark = ?,UpdateTime = ? ,UpdateBy=? WHERE PlantTrackingID = ?";
                     const Updatetrashlogs_query = mysql.format(sqlUpdatetrash_logs, [
                         Weight,
-                        LogTime,
                         TrashRemark,
                         RemarkTrash_log,
                         dateTime,
@@ -494,7 +493,7 @@ const addTransfers = async (req, res) => {
                         console.log(result.insertId);
 
 
-                        res.send({ success: true, message: 'บันทึกข้อมูลเรียบร้อยแล้ว', PlantTrackingID: result.insertId });
+                        res.send({ success: true, message: 'บันทึกข้อมูลเรียบร้อยแล้ว', TransferID: result.insertId });
                     });
 
                 }
