@@ -11,11 +11,17 @@ RouteTracking.get("/Plantracking",Trackingcontroller.getPlanttrackingbyid);
 RouteTracking.post("/harvests", Trackingcontroller.addHarvests);
 RouteTracking.put("/editHarvests", Trackingcontroller.editHarvests);
 RouteTracking.get("/getHarvests",Trackingcontroller.getHarvests);
+RouteTracking.get("/getHarvest",Trackingcontroller.getHarvestsByID)
 
 RouteTracking.post("/transfers", Trackingcontroller.addTransfers);
 RouteTracking.put("/editTransfers", Trackingcontroller.editTransfers);
+RouteTracking.get("/getTransfers",Trackingcontroller.getTransfers);
+RouteTracking.get("/getTransfer",Trackingcontroller.getTransferByID)
 
 RouteTracking.post("/addCultivations", Trackingcontroller.addCultivations);
-RouteTracking.get("/getCultivations",Trackingcontroller.getCultivations);
+RouteTracking.put("/editCultivatiions",Trackingcontroller.editCultivations);
+RouteTracking.get("/getCultivations",Trackingcontroller.getCultivationsByNameGH);
+RouteTracking.get("/AllCultivations",Trackingcontroller.getAllCultivations);
+RouteTracking.get("/Cultivation",Trackingcontroller.getCultivationByID);
 
 module.exports = RouteTracking;

@@ -152,7 +152,7 @@ const getPlanttracking = function (req, res) {
     const Barcode = req.query.Barcode;
 
     connection.query(
-        "SELECT p.PlantTrackingID,p.CheckDate,p.PlantStatus,p.SoilMoisture,p.SoilRemark,p.Remark,im.ImageID,im.FileName,d.DiseaseLogID,d.Disease,d.Fix FixDisease,i.InsectLogID,i.Insect,i.Fix FixInsect,t.TrashLogID,t.Weight,t.LogTime,t.TrashRemark,t.Remark,pots.PotID,pots.Name potsName,pots.GreenHouseID,g.Name GHName,pots.CultivationID,c.No,pots.Barcode,pots.IsTestPot,pots.Remark FROM plant_trackings p,image_logs im,disease_logs d,insect_logs i,trash_logs t,pots,greenhouses g,cultivations c WHERE p.PlantTrackingID=im.PlantTrackingID AND  p.PlantTrackingID=d.PlantTrackingID AND  p.PlantTrackingID=i.PlantTrackingID AND p.PlantTrackingID=t.PlantTrackingID AND pots.GreenHouseID = g.GreenHouseID AND c.CultivationID=pots.CultivationID AND p.PotID = pots.PotID AND pots.Barcode = ?", [Barcode],
+        "SELECT p.PlantTrackingID,p.CheckDate,p.PlantStatus,p.SoilMoisture,p.SoilRemark,p.Remark,im.ImageID,im.FileName,d.DiseaseLogID,d.Disease,d.Fix FixDisease,i.InsectLogID,i.Insect,i.Fix FixInsect,t.TrashLogID,t.Weight,t.LogTime,t.TrashRemark,t.Remark,pots.PotID,pots.Name potsName,pots.GreenHouseID,g.Name GHName,pots.CultivationID,c.No,pots.Barcode,pots.IsTestPot,pots.Remark FROM plant_trackings p,image_logs im,disease_logs d,insect_logs i,trash_logs t,pots,greenhouses g,cultivations c WHERE p.PlantTrackingID=im.PlantTrackingID AND  p.PlantTrackingID=d.PlantTrackingID AND  p.PlantTrackingID=i.PlantTrackingID AND p.PlantTrackingID=t.PlantTrackingID AND pots.GreenHouseID = g.GreenHouseID AND c.CultivationID=pots.CultivationID AND p.PotID = pots.PotID AND pots.Barcode = ? ORDER BY p.PlantTrackingID DESC", [Barcode],
         function (err, results) {
             if (err) throw err;
             console.log(Barcode)
@@ -372,7 +372,30 @@ const addHarvests = async (req, res) => {
 
 const getHarvests = function (req, res) {
     connection.query(
-        "SELECT * FROM `harvests`",
+        "SELECT harvests.*,greenhouses.Name NameGH  FROM harvests  INNER JOIN greenhouses ON harvests.GreenHouseID=greenhouses.GreenHouseID ORDER BY harvests.HarvestID DESC",
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search Harvests ")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        }
+    );
+
+}
+
+const getHarvestsByID = function (req, res) {
+    const ID = req.query.id;
+    connection.query(
+        "SELECT harvests.*,greenhouses.Name NameGH  FROM harvests  INNER JOIN greenhouses ON harvests.GreenHouseID=greenhouses.GreenHouseID WHERE harvests.HarvestID = ?",[ID],
         function (err, results) {
             if (err) throw err;
             console.log("------> Search Harvests ")
@@ -395,13 +418,14 @@ const getHarvests = function (req, res) {
 //## Edit Harvests By HarvestID ##//
 const editHarvests = async (req, res) => {
     const HarvestID = req.body.HarvestID;
-    const GreenHouseID = req.body.GreenHouseID;
+   // const GreenHouseName = req.body.GreenHouseName;
     const HarvestDate = req.body.HarvestDate;
     const HarvestNo = req.body.HarvestNo;
     const Type = req.body.Type;
     const Weight = req.body.Weight;
     const LotNo = req.body.LotNo;
     const Remark = req.body.Remark;
+    const UpdateBy = req.body.UpdateBy;
 
 
     connection.getConnection(async (err, connection) => {
@@ -410,8 +434,8 @@ const editHarvests = async (req, res) => {
         const search_query = mysql.format(sqlSearch, [HarvestID])
 
 
-        const sqlUpdate = "UPDATE harvests SET HarvestDate = ?, HarvestNo = ?,Type = ?,Weight = ?, LotNo = ?,Remark=?, UpdateTime=?  WHERE  HarvestID = ?"
-        const Update_query = mysql.format(sqlUpdate, [HarvestDate + " " + TimeNow, HarvestNo, Type, Weight, LotNo, Remark, dateTime, HarvestID])
+        const sqlUpdate = "UPDATE harvests SET HarvestDate = ?, HarvestNo = ?,Type = ?,Weight = ?, LotNo = ?,Remark=?,UpdateBy=?, UpdateTime=?  WHERE  HarvestID = ?"
+        const Update_query = mysql.format(sqlUpdate, [HarvestDate + " " + TimeNow, HarvestNo, Type, Weight, LotNo, Remark, UpdateBy,dateTime, HarvestID])
 
 
         // ? will be replaced by values
@@ -476,13 +500,13 @@ const addTransfers = async (req, res) => {
             connection.query(search_query, async (err, result) => {
                 if (err)
                     throw (err);
-                console.log("------> Search GreenHouses");
+                console.log("------> Search HarvestID");
                 console.log(result.length);
                 if (result.length == 0) {
                     connection.release();
                     console.log("------> exists");
                     //res.sendStatus(409) 
-                    res.send({ success: false, message: 'ไม่พบโรงเรือน' });
+                    res.send({ success: false, message: 'ไม่พบหมายเลขการปลูก' });
                 }
                 else {
                     await connection.query(insert_query, (err, result) => {
@@ -508,6 +532,7 @@ const addTransfers = async (req, res) => {
 //## Edit Transfers By TransferID ##//
 const editTransfers = async (req, res) => {
     const TransferID = req.body.TransferID;
+    const HarvestID = req.body.HarvestID;
     const TransferDate = req.body.TransferDate;
     const Type = req.body.Type;
     const Weight = req.body.Weight;
@@ -517,6 +542,7 @@ const editTransfers = async (req, res) => {
     const LicenseNo = req.body.LicenseNo;
     const LicensePlate = req.body.LicensePlate;
     const Remark = req.body.Remark;
+    const UpdateBy =req.body.UpdateBy;
 
 
     connection.getConnection(async (err, connection) => {
@@ -524,8 +550,8 @@ const editTransfers = async (req, res) => {
         const sqlSearch = "SELECT * FROM transfers WHERE TransferID = ?"
         const search_query = mysql.format(sqlSearch, [TransferID])
 
-        const sqlUpdate = "UPDATE transfers SET TransferDate=?,Type=?,Weight=?,LotNo=?,GetByName=?,GetByPlace=?,LicenseNo=?,LicensePlate=?,Remark=?,UpdateTime=? WHERE  TransferID = ?"
-        const Update_query = mysql.format(sqlUpdate, [TransferDate + " " + TimeNow, Type, Weight, LotNo, GetByName, GetByPlace, LicenseNo, LicensePlate, Remark, dateTime, TransferID])
+        const sqlUpdate = "UPDATE transfers SET HarvestID=?,TransferDate=?,Type=?,Weight=?,LotNo=?,GetByName=?,GetByPlace=?,LicenseNo=?,LicensePlate=?,Remark=?,UpdateTime=?,UpdateBy=? WHERE  TransferID = ?"
+        const Update_query = mysql.format(sqlUpdate, [HarvestID,TransferDate + " " + TimeNow, Type, Weight, LotNo, GetByName, GetByPlace, LicenseNo, LicensePlate, Remark, dateTime,UpdateBy, TransferID])
 
 
         // ? will be replaced by values
@@ -556,6 +582,51 @@ const editTransfers = async (req, res) => {
             }
         })
     })
+}
+
+const getTransfers = function (req, res) {
+    connection.query(
+        "SELECT transfers.*,harvests.HarvestNo FROM transfers INNER JOIN harvests ON transfers.HarvestID=harvests.HarvestID ORDER BY transfers.TransferID DESC;",
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search Transfers ")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        }
+    );
+
+}
+
+const getTransferByID = function (req, res) {
+    const ID = req.query.id;
+    connection.query(
+        "SELECT transfers.*,harvests.HarvestNo FROM transfers INNER JOIN harvests ON transfers.HarvestID=harvests.HarvestID WHERE transfers.TransferID = ?",[ID],
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search Transfer ")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        }
+    );
+
 }
 
 //## Add Cultivations ##//
@@ -635,8 +706,104 @@ const addCultivations = async (req, res) => {
         console.log("---------> Invalid data!")
     }
 }
+const editCultivations = async (req, res) => {
+    const CultivationID = req.body.CultivationID;
+    const GreenHouseName = req.body.GreenHouseName;
+    const StrainName = req.body.StrainName;
+    const No = req.body.No;
+    const SeedDate = req.body.SeedDate;
+    const MoveDate = req.body.MoveDate;
+    const SeedTotal = req.body.SeedTotal;
+    const SeedNet = req.body.SeedNet;
+    const PlantTotal = req.body.PlantTotal;
+    const PlantLive = req.body.PlantLive;
+    const PlantDead = req.body.PlantDead;
+    const Remark = req.body.Remark;
+    //const CreateBy = req.body.CreateBy;
+    const UpdateBy = req.body.UpdateBy;
 
-const getCultivations = function (req, res) {
+    connection.getConnection(async (err, connection) => {
+        if (err) throw (err)
+        const sqlSearchGH = "SELECT * FROM greenhouses WHERE Name = ?"
+        const searchGH_query = mysql.format(sqlSearchGH, [GreenHouseName])
+
+        const sqlSearchStrain = "SELECT * FROM strains WHERE Name = ?"
+        const searchStrain_query = mysql.format(sqlSearchStrain, [StrainName])
+
+
+
+        // ?? will be replaced by string
+        connection.query(searchGH_query, async (err, resultGH) => {
+            if (err)
+                throw (err);
+            console.log("------> Search Name GreenHouse");
+            //console.log(resultGH.length);
+            if (resultGH.length == 0) {
+                connection.release();
+                console.log("------> exists");
+                //res.sendStatus(409) 
+                res.send({ success: false, message: 'ไม่พบโรงปลูก' });
+            }
+            else {
+                connection.query(searchStrain_query, async (err, result) => {
+                    if (err)
+                        throw (err);
+                    console.log("------> Search Name Strain");
+                    //console.log(result.length);
+                    if (result.length == 0) {
+                        connection.release();
+                        console.log("------> exists");
+                        //res.sendStatus(409) 
+                        res.send({ success: false, message: 'ไม่พบข้อมูลสายพันธุ์' });
+                    }
+                    else {
+                        const sqlSearch = "SELECT * FROM cultivations WHERE CultivationID = ?"
+                        const search_query = mysql.format(sqlSearch, [CultivationID])
+
+
+                        const sqlUpdate = "UPDATE cultivations SET GreenHouseID = ?, StrainID = ?,No = ?,SeedDate = ?, MoveDate = ?,SeedTotal=?, SeedNet=? ,PlantTotal = ?, PlantLive = ?,PlantDead = ? ,Remark=?,UpdateTime=?,UpdateBy=? WHERE  CultivationID = ?"
+                        const Update_query = mysql.format(sqlUpdate, [resultGH[0]["GreenHouseID"], result[0]["StrainID"], No, SeedDate, MoveDate, SeedTotal, SeedNet, PlantTotal,PlantLive,PlantDead,Remark,TimeNow,UpdateBy,CultivationID])
+
+
+                        // ? will be replaced by values
+                        // ?? will be replaced by string
+                        connection.query(search_query, async (err, result) => {
+                            if (err)
+                                throw (err);
+                            console.log("------> Search Cultivation");
+                            console.log(result.length);
+                            if (result.length == 0) {
+                                connection.release();
+                                console.log("------> exists");
+                                //res.sendStatus(409) 
+                                res.send({ success: false, message: 'ไม่พบข้อมูลการปลูก' });
+                            }
+                            else {
+                                await connection.query(Update_query, (err, result) => {
+                                    connection.release();
+                                    if (err)
+                                        throw (err);
+                                    console.log("-------->  The data was saved successfully.");
+
+
+
+                                    res.send({ success: true, message: 'แก้ไขข้อมูลเรียบร้อยแล้ว' });
+                                });
+
+                            }
+                        });
+                    }
+                })
+            }
+        })
+    })
+}
+
+
+
+
+
+const getCultivationsByNameGH = function (req, res) {
     const NameGH = req.query.NameGH;
 
     connection.query(
@@ -658,8 +825,50 @@ const getCultivations = function (req, res) {
             //console.log('OK')
         },
     );
-
-
 }
 
-module.exports = { addPlanttracking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers, addCultivations, getCultivations, getHarvests, getPlanttracking, getPlanttrackingbyid };
+const getAllCultivations = function (req, res) {
+
+    connection.query(
+        "SELECT cultivations.*,greenhouses.Name NameGH ,strains.Name NameStrains,strains.ShortName FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID INNER JOIN strains ON cultivations.StrainID=strains.StrainID  ORDER BY cultivations.CultivationID DESC",
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search Cultivations")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        },
+    );
+}
+
+const getCultivationByID = function (req, res) {
+    const ID = req.query.ID;
+    connection.query(
+        "SELECT cultivations.*,greenhouses.Name NameGH ,strains.Name NameStrains,strains.ShortName FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID INNER JOIN strains ON cultivations.StrainID=strains.StrainID WHERE cultivations.CultivationID = ?", [ID],
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search Cultivations")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        },
+    );
+}
+
+module.exports = { addPlanttracking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers, addCultivations, getCultivationsByNameGH, getHarvests, getPlanttracking, getPlanttrackingbyid, getAllCultivations, getCultivationByID, editCultivations,getHarvestsByID,getTransfers,getTransferByID };
