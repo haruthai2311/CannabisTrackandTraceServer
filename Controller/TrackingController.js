@@ -200,6 +200,57 @@ const getPlanttrackingbyid = function (req, res) {
 
 }
 
+const getCountDisease = function (req, res) {
+
+    connection.query(
+        "SELECT CultivationID,COUNT(PotID) Count FROM (SELECT cultivations.CultivationID,pots.PotID FROM ((`cultivations` INNER JOIN pots ON cultivations.CultivationID=pots.CultivationID ) INNER JOIN plant_trackings ON pots.PotID=plant_trackings.PotID) INNER JOIN disease_logs ON plant_trackings.PlantTrackingID = disease_logs.PlantTrackingID WHERE disease_logs.Disease != 'ไม่พบ' GROUP BY pots.PotID) AS subquery WHERE CultivationID = (SELECT cultivations.CultivationID FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID INNER JOIN strains ON cultivations.StrainID=strains.StrainID ORDER BY cultivations.CultivationID DESC LIMIT 1)",
+        function (err, results) {
+            if (err) throw err;
+
+            console.log("------> CountDisease")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        },
+    );
+
+
+}
+
+const getCountInsect = function (req, res) {
+
+    connection.query(
+        "SELECT CultivationID,COUNT(PotID) Count FROM (SELECT cultivations.CultivationID,pots.PotID FROM ((`cultivations` INNER JOIN pots ON cultivations.CultivationID=pots.CultivationID ) INNER JOIN plant_trackings ON pots.PotID=plant_trackings.PotID) INNER JOIN insect_logs ON plant_trackings.PlantTrackingID = insect_logs.PlantTrackingID WHERE insect_logs.Insect != 'ไม่พบ' GROUP BY pots.PotID) AS subquery WHERE CultivationID = (SELECT cultivations.CultivationID FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID INNER JOIN strains ON cultivations.StrainID=strains.StrainID ORDER BY cultivations.CultivationID DESC LIMIT 1)",
+        function (err, results) {
+            if (err) throw err;
+
+            console.log("------> CountDisease")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        },
+    );
+
+
+}
+
+
 //## Edit PlantTrackings By PlantTrackingID ##//
 const editPlanttracking = async (req, res) => {
     const PlantTrackingID = req.body.PlantTrackingID;
@@ -395,7 +446,7 @@ const getHarvests = function (req, res) {
 const getHarvestsByID = function (req, res) {
     const ID = req.query.id;
     connection.query(
-        "SELECT harvests.*,greenhouses.Name NameGH  FROM harvests  INNER JOIN greenhouses ON harvests.GreenHouseID=greenhouses.GreenHouseID WHERE harvests.HarvestID = ?",[ID],
+        "SELECT harvests.*,greenhouses.Name NameGH  FROM harvests  INNER JOIN greenhouses ON harvests.GreenHouseID=greenhouses.GreenHouseID WHERE harvests.HarvestID = ?", [ID],
         function (err, results) {
             if (err) throw err;
             console.log("------> Search Harvests ")
@@ -418,7 +469,7 @@ const getHarvestsByID = function (req, res) {
 //## Edit Harvests By HarvestID ##//
 const editHarvests = async (req, res) => {
     const HarvestID = req.body.HarvestID;
-   // const GreenHouseName = req.body.GreenHouseName;
+    // const GreenHouseName = req.body.GreenHouseName;
     const HarvestDate = req.body.HarvestDate;
     const HarvestNo = req.body.HarvestNo;
     const Type = req.body.Type;
@@ -435,7 +486,7 @@ const editHarvests = async (req, res) => {
 
 
         const sqlUpdate = "UPDATE harvests SET HarvestDate = ?, HarvestNo = ?,Type = ?,Weight = ?, LotNo = ?,Remark=?,UpdateBy=?, UpdateTime=?  WHERE  HarvestID = ?"
-        const Update_query = mysql.format(sqlUpdate, [HarvestDate + " " + TimeNow, HarvestNo, Type, Weight, LotNo, Remark, UpdateBy,dateTime, HarvestID])
+        const Update_query = mysql.format(sqlUpdate, [HarvestDate + " " + TimeNow, HarvestNo, Type, Weight, LotNo, Remark, UpdateBy, dateTime, HarvestID])
 
 
         // ? will be replaced by values
@@ -542,7 +593,7 @@ const editTransfers = async (req, res) => {
     const LicenseNo = req.body.LicenseNo;
     const LicensePlate = req.body.LicensePlate;
     const Remark = req.body.Remark;
-    const UpdateBy =req.body.UpdateBy;
+    const UpdateBy = req.body.UpdateBy;
 
 
     connection.getConnection(async (err, connection) => {
@@ -551,7 +602,7 @@ const editTransfers = async (req, res) => {
         const search_query = mysql.format(sqlSearch, [TransferID])
 
         const sqlUpdate = "UPDATE transfers SET HarvestID=?,TransferDate=?,Type=?,Weight=?,LotNo=?,GetByName=?,GetByPlace=?,LicenseNo=?,LicensePlate=?,Remark=?,UpdateTime=?,UpdateBy=? WHERE  TransferID = ?"
-        const Update_query = mysql.format(sqlUpdate, [HarvestID,TransferDate + " " + TimeNow, Type, Weight, LotNo, GetByName, GetByPlace, LicenseNo, LicensePlate, Remark, dateTime,UpdateBy, TransferID])
+        const Update_query = mysql.format(sqlUpdate, [HarvestID, TransferDate + " " + TimeNow, Type, Weight, LotNo, GetByName, GetByPlace, LicenseNo, LicensePlate, Remark, dateTime, UpdateBy, TransferID])
 
 
         // ? will be replaced by values
@@ -609,7 +660,7 @@ const getTransfers = function (req, res) {
 const getTransferByID = function (req, res) {
     const ID = req.query.id;
     connection.query(
-        "SELECT transfers.*,harvests.HarvestNo FROM transfers INNER JOIN harvests ON transfers.HarvestID=harvests.HarvestID WHERE transfers.TransferID = ?",[ID],
+        "SELECT transfers.*,harvests.HarvestNo FROM transfers INNER JOIN harvests ON transfers.HarvestID=harvests.HarvestID WHERE transfers.TransferID = ?", [ID],
         function (err, results) {
             if (err) throw err;
             console.log("------> Search Transfer ")
@@ -762,7 +813,7 @@ const editCultivations = async (req, res) => {
 
 
                         const sqlUpdate = "UPDATE cultivations SET GreenHouseID = ?, StrainID = ?,No = ?,SeedDate = ?, MoveDate = ?,SeedTotal=?, SeedNet=? ,PlantTotal = ?, PlantLive = ?,PlantDead = ? ,Remark=?,UpdateTime=?,UpdateBy=? WHERE  CultivationID = ?"
-                        const Update_query = mysql.format(sqlUpdate, [resultGH[0]["GreenHouseID"], result[0]["StrainID"], No, SeedDate, MoveDate, SeedTotal, SeedNet, PlantTotal,PlantLive,PlantDead,Remark,TimeNow,UpdateBy,CultivationID])
+                        const Update_query = mysql.format(sqlUpdate, [resultGH[0]["GreenHouseID"], result[0]["StrainID"], No, SeedDate, MoveDate, SeedTotal, SeedNet, PlantTotal, PlantLive, PlantDead, Remark, TimeNow, UpdateBy, CultivationID])
 
 
                         // ? will be replaced by values
@@ -807,7 +858,7 @@ const getCultivationsByNameGH = function (req, res) {
     const NameGH = req.query.NameGH;
 
     connection.query(
-        "SELECT cultivations.*,greenhouses.Name FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID WHERE greenhouses.Name = ?", [NameGH],
+        "SELECT cultivations.*,ROUND((PlantLive/PlantTotal)*100, 2) as 'PercentageLive', ROUND((PlantDead/PlantTotal)*100, 2) as 'PercentageDead',greenhouses.Name FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID WHERE greenhouses.Name = ?", [NameGH],
         function (err, results) {
             if (err) throw err;
             console.log(NameGH)
@@ -830,7 +881,7 @@ const getCultivationsByNameGH = function (req, res) {
 const getAllCultivations = function (req, res) {
 
     connection.query(
-        "SELECT cultivations.*,greenhouses.Name NameGH ,strains.Name NameStrains,strains.ShortName FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID INNER JOIN strains ON cultivations.StrainID=strains.StrainID  ORDER BY cultivations.CultivationID DESC",
+        "SELECT cultivations.*,ROUND((PlantLive/PlantTotal)*100, 2) as 'PercentageLive', ROUND((PlantDead/PlantTotal)*100, 2) as 'PercentageDead',greenhouses.Name NameGH ,strains.Name NameStrains,strains.ShortName ,CONCAT('รอบปลูกที่ ',cultivations.No,' ','โรงปลูก ',greenhouses.Name) culGH FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID INNER JOIN strains ON cultivations.StrainID=strains.StrainID  ORDER BY cultivations.CultivationID DESC",
         function (err, results) {
             if (err) throw err;
             console.log("------> Search Cultivations")
@@ -852,7 +903,7 @@ const getAllCultivations = function (req, res) {
 const getCultivationByID = function (req, res) {
     const ID = req.query.ID;
     connection.query(
-        "SELECT cultivations.*,greenhouses.Name NameGH ,strains.Name NameStrains,strains.ShortName FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID INNER JOIN strains ON cultivations.StrainID=strains.StrainID WHERE cultivations.CultivationID = ?", [ID],
+        "SELECT cultivations.*,ROUND((PlantLive/PlantTotal)*100, 2) as 'PercentageLive', ROUND((PlantDead/PlantTotal)*100, 2) as 'PercentageDead',greenhouses.Name NameGH ,strains.Name NameStrains,strains.ShortName,CONCAT('รอบปลูกที่ ',cultivations.No,' ','โรงปลูก ',greenhouses.Name) culGH FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID INNER JOIN strains ON cultivations.StrainID=strains.StrainID WHERE cultivations.CultivationID = ?", [ID],
         function (err, results) {
             if (err) throw err;
             console.log("------> Search Cultivations")
@@ -871,4 +922,7 @@ const getCultivationByID = function (req, res) {
     );
 }
 
-module.exports = { addPlanttracking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers, addCultivations, getCultivationsByNameGH, getHarvests, getPlanttracking, getPlanttrackingbyid, getAllCultivations, getCultivationByID, editCultivations,getHarvestsByID,getTransfers,getTransferByID };
+
+
+
+module.exports = { addPlanttracking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers, addCultivations, getCultivationsByNameGH, getHarvests, getPlanttracking, getPlanttrackingbyid, getAllCultivations, getCultivationByID, editCultivations, getHarvestsByID, getTransfers, getTransferByID,getCountDisease ,getCountInsect};

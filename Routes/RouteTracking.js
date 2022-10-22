@@ -8,6 +8,9 @@ RouteTracking.put("/editPlanttracking", Trackingcontroller.editPlanttracking);
 RouteTracking.get("/getPlantracking",Trackingcontroller.getPlanttracking);
 RouteTracking.get("/Plantracking",Trackingcontroller.getPlanttrackingbyid);
 
+RouteTracking.get("/CountDisease",Trackingcontroller.getCountDisease);
+RouteTracking.get("/CountInsect",Trackingcontroller.getCountInsect);
+
 RouteTracking.post("/harvests", Trackingcontroller.addHarvests);
 RouteTracking.put("/editHarvests", Trackingcontroller.editHarvests);
 RouteTracking.get("/getHarvests",Trackingcontroller.getHarvests);
