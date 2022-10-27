@@ -122,8 +122,6 @@ const editProfile = async (req, res) => {
     const fnameE = req.body.fnameE;
     const lnameE = req.body.lnameE
     const email = req.body.email
-    const username = req.body.username;
-    const hashedPassword = await md5(req.body.password);
     //const Password = req.body.password;
     //const confirmPassword = req.body.confirmPassword;
 
@@ -133,8 +131,8 @@ const editProfile = async (req, res) => {
         const sqlSearch = "SELECT * FROM users WHERE UserID = ?"
         const search_query = mysql.format(sqlSearch, [userid])
 
-        const sqlUpdate = "UPDATE users SET Username = ?, Password = ?,Email = ?,FNameT = ?,LNameT = ?,FNameE = ?,LNameE = ?,UpdateTime = ?,UpdateBy = ?  WHERE UserID = ?"
-        const update_query = mysql.format(sqlUpdate, [username, hashedPassword, email, fnameT, lnameT, fnameE, lnameE, dateTime, fnameT, userid])
+        const sqlUpdate = "UPDATE users SET Email = ?,FNameT = ?,LNameT = ?,FNameE = ?,LNameE = ?,UpdateTime = ?,UpdateBy = ?  WHERE UserID = ?"
+        const update_query = mysql.format(sqlUpdate, [email, fnameT, lnameT, fnameE, lnameE, dateTime, fnameT, userid])
         // ? will be replaced by values
         // ?? will be replaced by string
         await connection.query(search_query, async (err, result) => {
@@ -220,5 +218,26 @@ const getUsers = function (req, res) {
 
 }
 
+const getUserbyid = function (req, res) {
+    const ID = req.query.ID;
+    connection.query(
+        'SELECT * FROM `users` WHERE UserID = ?', [ID],
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search Cultivations")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+        },
+    );
 
-module.exports = { addUser, User, editProfile, deleteUserByID, getUsers }
+}
+
+
+module.exports = { addUser, User, editProfile, deleteUserByID, getUsers, getUserbyid }

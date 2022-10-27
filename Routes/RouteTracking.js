@@ -26,5 +26,8 @@ RouteTracking.put("/editCultivatiions",Trackingcontroller.editCultivations);
 RouteTracking.get("/getCultivations",Trackingcontroller.getCultivationsByNameGH);
 RouteTracking.get("/AllCultivations",Trackingcontroller.getAllCultivations);
 RouteTracking.get("/Cultivation",Trackingcontroller.getCultivationByID);
+RouteTracking.get("/Cultivations",Trackingcontroller.getCultivationByGH);
+RouteTracking.get("/Harvests",Trackingcontroller.getHarvestByGH)
+RouteTracking.get("/InfoCul",Trackingcontroller.getInfoCul)
 
 module.exports = RouteTracking;

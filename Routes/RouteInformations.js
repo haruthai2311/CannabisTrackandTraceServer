@@ -26,5 +26,8 @@ RouteInformations.get("/getInventorys", Infocontroller.getInventorys)
 RouteInformations.post("/addChemicalUses", Infocontroller.addChemicalUses)
 
 
+RouteInformations.get("/countcht",Infocontroller.countcht)
+
+
 
 module.exports = RouteInformations;

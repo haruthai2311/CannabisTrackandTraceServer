@@ -266,7 +266,7 @@ const addPots = async (req, res) => {
                         else {
                             //console.log(resultGH[0]["GreenHouseID"])
                             const sqlInsert = "INSERT INTO pots (GreenHouseID,CultivationID,Name,Barcode, IsTestPot, Remark, CreateTime,CreateBy, UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?)"
-                            const insert_query = mysql.format(sqlInsert, [resultGH[0]["GreenHouseID"], CultivationID, Name, Barcode, IsTestPot, Remark, dateTime,CreateBy, dateTime,UpdateBy])
+                            const insert_query = mysql.format(sqlInsert, [resultGH[0]["GreenHouseID"], CultivationID, Name, Barcode, IsTestPot, Remark, dateTime, CreateBy, dateTime, UpdateBy])
 
 
                             connection.query(insert_query, async (err, result) => {
@@ -289,28 +289,28 @@ const addPots = async (req, res) => {
 
 const getPots = function (req, res) {
     const NameGH = req.query.NameGH;
-    
-        connection.query(
-            "SELECT pots.*,greenhouses.Name FROM pots INNER JOIN greenhouses ON pots.GreenHouseID=greenhouses.GreenHouseID WHERE greenhouses.Name = ?", [NameGH],
-            function (err, results) {
-                if (err) throw err;
-                console.log(NameGH)
-                console.log("------> Search Pots")
-                //console.log(results.length)
-                if (results.length == 0) {
-                    console.log("------> exists")
-                    //res.sendStatus(409) 
-                    res.json(results)
-                }
-                else {
-                    res.json(results)
-                }
-                //res.json(results);
-                //console.log('OK')
-            },
-        );
 
-   
+    connection.query(
+        "SELECT pots.*,greenhouses.Name FROM pots INNER JOIN greenhouses ON pots.GreenHouseID=greenhouses.GreenHouseID WHERE greenhouses.Name = ?", [NameGH],
+        function (err, results) {
+            if (err) throw err;
+            console.log(NameGH)
+            console.log("------> Search Pots")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        },
+    );
+
+
 }
 
 const getStrains = function (req, res) {
@@ -482,6 +482,31 @@ const addChemicalUses = async (req, res) => {
     }
 }
 
-module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains, getInventorys ,getPots}
+
+const countcht = function (req, res) {
+    const id = req.query.id;
+    const year = req.query.year;
+    connection.query(
+        'SELECT * FROM (SELECT * FROM (SELECT greenhouses.GreenHouseID ,greenhouses.Name NameGreenhouse,locations.Name NameLocation,CONCAT("เลขที่ ",locations.AddrNo," หมู่ ",locations.Moo," ",locations.Road," ตำบล ",locations.SubDistrictID," อำเภอ ",locations.DistrictID," จังหวัด ",locations.ProvinceID," ",locations.PostCode) Address FROM greenhouses JOIN locations ON greenhouses.LocationID=locations.LocationID) AS GH LEFT JOIN (SELECT GreenHouseID GHIDcul,COUNT(GreenHouseID) CountCul,YEAR(CreateTime) YearCul FROM cultivations WHERE YEAR(CreateTime)=? GROUP BY GreenHouseID) AS CT ON GH.GreenHouseID = CT.GHIDcul LEFT JOIN (SELECT GreenHouseID GHIDher,COUNT(GreenHouseID) CountHar ,YEAR(CreateTime) YearHar FROM harvests WHERE YEAR(CreateTime)=? GROUP BY GreenHouseID) AS HV ON GH.GreenHouseID = HV.GHIDher LEFT JOIN (SELECT harvests.GreenHouseID GHIDTran, COUNT(harvests.GreenHouseID) CountTran,YEAR(transfers.CreateTime) YearTran FROM harvests LEFT JOIN transfers ON harvests.HarvestID = transfers.HarvestID WHERE YEAR(harvests.CreateTime)=? GROUP BY harvests.GreenHouseID) AS TF ON GH.GreenHouseID = TF.GHIDTran GROUP BY GH.GreenHouseID) AS CCH WHERE GreenHouseID = ?', [year,year,year,id],
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search")
+            //console.log(year)
+        //console.log(id)
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+        },
+    );
+
+}
+
+module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains, getInventorys, getPots, countcht }
 
 

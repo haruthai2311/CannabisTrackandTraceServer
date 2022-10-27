@@ -922,7 +922,73 @@ const getCultivationByID = function (req, res) {
     );
 }
 
+const getCultivationByGH = function (req, res) {
+    const gh = req.query.gh;
+    connection.query(
+        "SELECT * FROM(SELECT cultivations.*,greenhouses.Name NameGH ,strains.Name NameStrains,strains.ShortName FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID INNER JOIN strains ON cultivations.StrainID=strains.StrainID) AS C LEFT JOIN (SELECT CultivationID cid,GreenHouseID ghid,COUNT(GreenHouseID) amountpots FROM `pots` GROUP BY CultivationID) AS P ON CultivationID=cid WHERE GreenHouseID = ?", [gh],
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search Cultivations")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        },
+    );
+}
+
+const getHarvestByGH = function (req, res) {
+    const gh = req.query.gh;
+    connection.query(
+        "SELECT * FROM `harvests` LEFT JOIN transfers ON harvests.HarvestID=transfers.HarvestID WHERE GreenHouseID = ?", [gh],
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        },
+    );
+}
+
+const getInfoCul = function (req, res) {
+    
+    connection.query(
+        "SELECT * FROM(SELECT cultivations.*,greenhouses.Name NameGH ,strains.Name NameStrains,strains.ShortName FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID INNER JOIN strains ON cultivations.StrainID=strains.StrainID GROUP BY cultivations.GreenHouseID) AS C LEFT JOIN (SELECT CultivationID cid,GreenHouseID ghid,COUNT(GreenHouseID) amountpots FROM `pots` WHERE CultivationID IN ( SELECT MAX(CultivationID) FROM pots GROUP BY GreenHouseID )GROUP BY CultivationID DESC) AS P ON GreenHouseID=ghid", 
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        },
+    );
+}
 
 
 
-module.exports = { addPlanttracking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers, addCultivations, getCultivationsByNameGH, getHarvests, getPlanttracking, getPlanttrackingbyid, getAllCultivations, getCultivationByID, editCultivations, getHarvestsByID, getTransfers, getTransferByID,getCountDisease ,getCountInsect};
+
+module.exports = { addPlanttracking, editPlanttracking, addHarvests, editHarvests, addTransfers, editTransfers, addCultivations, getCultivationsByNameGH, getHarvests, getPlanttracking, getPlanttrackingbyid, getAllCultivations, getCultivationByID, editCultivations, getHarvestsByID, getTransfers, getTransferByID, getCountDisease, getCountInsect, getCultivationByGH, getHarvestByGH,getInfoCul };
