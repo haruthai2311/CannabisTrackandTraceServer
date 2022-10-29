@@ -507,6 +507,74 @@ const countcht = function (req, res) {
 
 }
 
-module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains, getInventorys, getPots, countcht }
+const provinces = function (req, res) {
+    connection.query(
+        "SELECT * FROM `provinces`", 
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search")
+            //console.log(year)
+        //console.log(id)
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+        },
+    );
+
+}
+
+const districts = function (req, res) {
+    const pid = req.query.pid;
+    connection.query(
+        "SELECT * FROM `districts` WHERE province_id = ?",[pid], 
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search")
+            //console.log(year)
+        //console.log(id)
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+        },
+    );
+
+}
+
+const subdistricts = function (req, res) {
+    const did = req.query.did;
+    connection.query(
+        "SELECT * FROM `subdistricts` WHERE district_id = ?",[did], 
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search")
+            //console.log(year)
+        //console.log(id)
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json(results)
+            }
+            else {
+                res.json(results)
+            }
+        },
+    );
+
+}
+
+module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains, getInventorys, getPots, countcht ,provinces,districts,subdistricts}
 
 

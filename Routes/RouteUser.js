@@ -11,4 +11,6 @@ RouteUser.delete("/deleteuser", Usercontroller.deleteUserByID);
 RouteUser.get('/getAllUsers',Usercontroller.getUsers);
 RouteUser.get('/getUserbyid',Usercontroller.getUserbyid);
 
+RouteUser.put('/changepassword',Usercontroller.changepassword);
+
 module.exports = RouteUser;

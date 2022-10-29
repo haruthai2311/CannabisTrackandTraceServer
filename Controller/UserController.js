@@ -239,5 +239,68 @@ const getUserbyid = function (req, res) {
 
 }
 
+const changepassword = async (req, res) => {
+    const userid = req.body.id;
+   
+    const hashedPassword = await md5(req.body.newpassword);
+    const Password = req.body.password;
+    const NewPassword = req.body.newpassword;
+    const confirmNewPassword = req.body.confirmnewPassword;
 
-module.exports = { addUser, User, editProfile, deleteUserByID, getUsers, getUserbyid }
+
+    //console.log(dateTime);
+    if (userid && Password && NewPassword && confirmNewPassword) {
+        connection.getConnection(async (err, connection) => {
+            if (err) throw (err)
+            const sqlSearch = "SELECT * FROM `users` WHERE UserID = ?"
+            const search_query = mysql.format(sqlSearch, [userid])
+
+            const sqlUpdate = "UPDATE users SET `Password` = ?, UpdateTime= ?,UpdateBy = ? WHERE UserID = ?"
+            const update_query = mysql.format(sqlUpdate, [hashedPassword,  dateTime, userid,userid])
+            // ? will be replaced by values
+            // ?? will be replaced by string
+            await connection.query(search_query, async (err, result) => {
+                if (err) throw (err)
+                console.log("------> Search Results")
+                console.log(result.length)
+                if (result.length == 0) {
+                    connection.release()
+                    console.log("------> User already exists")
+                    Controller / UserController.js                    //res.sendStatus(409) 
+                    res.send({ success: false, message: 'ไม่พบบัญชีผู้ใช้!' })
+                }
+                else {
+                    const hashedPassword = await md5(Password);
+                    //onsole.log(result[0]['Password'])
+                    //console.log(hashedPassword)
+                    //get the hashedPassword from result
+                    if (result[0]['Password'] == hashedPassword) {
+                        if (NewPassword == confirmNewPassword) {
+                            await connection.query(update_query, (err, result) => {
+                                connection.release()
+                                if (err) throw (err)
+                                console.log("--------> changepassword")
+                                //res.sendStatus(201)
+                                res.send({ success: true, message: 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว'})
+                            })
+                        } else {
+                            res.send({ success: false, message: 'รหัสผ่านไม่ตรงกัน' })
+                        }
+                    }
+                    else {
+                        console.log("---------> Password Incorrect")
+                        res.send({ success: false, message: 'รหัสผ่านไม่ถูกต้อง!' })
+                    }
+                    
+                    
+                }
+            })
+        })
+    } else {
+        res.send({ ok: false, error: 'Invalid data!' });
+        console.log("---------> Invalid data!")
+    }
+}
+
+
+module.exports = { addUser, User, editProfile, deleteUserByID, getUsers, getUserbyid ,changepassword}

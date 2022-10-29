@@ -28,6 +28,9 @@ RouteInformations.post("/addChemicalUses", Infocontroller.addChemicalUses)
 
 RouteInformations.get("/countcht",Infocontroller.countcht)
 
+RouteInformations.get("/provinces",Infocontroller.provinces)
+RouteInformations.get("/districts",Infocontroller.districts)
+RouteInformations.get("/subdistricts",Infocontroller.subdistricts)
 
 
 module.exports = RouteInformations;
