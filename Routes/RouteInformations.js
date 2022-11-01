@@ -9,6 +9,7 @@ RouteInformations.get("/getStrains", Infocontroller.getStrains)
 
 
 RouteInformations.post("/addLocations", Infocontroller.addLocations)
+RouteInformations.get("/getLocations",Infocontroller.getLocations)
 
 
 RouteInformations.post("/addGreenhouses", Infocontroller.addGreenhouses)

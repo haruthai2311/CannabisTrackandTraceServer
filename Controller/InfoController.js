@@ -73,7 +73,7 @@ const addLocations = async (req, res) => {
     const Remark = req.body.Remark;
     const IsActive = req.body.IsActive;
     const CreateBy = req.body.CreateBy;
-    const UpdateBy = req.body.UpdateBy
+    const UpdateBy = req.body.UpdateBy;
 
 
     //ได้แต่มันซับซ้อนเกินไป
@@ -129,33 +129,54 @@ const addLocations = async (req, res) => {
     }
 }
 
+const getLocations = function (req, res) {
+    connection.query(
+        "SELECT * FROM `locations` WHERE IsActive = 'Y'",
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search Locations")
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists")
+                //res.sendStatus(409) 
+                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+            }
+            else {
+                res.json(results)
+            }
+            //res.json(results);
+            //console.log('OK')
+        }
+    );
+
+}
+
 //## Add Greenhouses ##//
 const addGreenhouses = async (req, res) => {
-    const LocationID = req.body.LocationID;
+    const LocationName = req.body.LocationName;
     const Name = req.body.Name;
     const Remark = req.body.Remark;
     const IsActive = req.body.IsActive;
-
+    const CreateBy = req.body.CreateBy;
+    const UpdateBy = req.body.UpdateBy;
 
     //if (nameGreenHouse&&CheckDate&&PlantStatus&&SoilMoisture&&Disease&&FixDisease&&Insect&&FixInsect&&ImageFileName){
-    if (LocationID && Name) {
+    if (LocationName && Name) {
         connection.getConnection(async (err, connection) => {
             if (err) throw (err)
-            const sqlSearch = "SELECT * FROM locations WHERE LocationID = ?"
-            const search_query = mysql.format(sqlSearch, [LocationID])
+            const sqlSearch = "SELECT * FROM locations WHERE Name = ?"
+            const search_query = mysql.format(sqlSearch, [LocationName])
 
             const sqlSearchName = "SELECT * FROM greenhouses WHERE Name = ?"
             const searchName_query = mysql.format(sqlSearchName, [Name])
 
-            const sqlInsert = "INSERT INTO greenhouses (locationID,Name, IsActive, Remark, CreateTime, UpdateTime) VALUES (?,?,?,?,?,?)"
-            const insert_query = mysql.format(sqlInsert, [LocationID, Name, IsActive, Remark, dateTime, dateTime])
-
+            
 
             // ?? will be replaced by string
             connection.query(search_query, async (err, result) => {
                 if (err)
                     throw (err);
-                console.log("------> Search Name Greenhouses");
+                console.log("------> Search Name Location");
                 console.log(result.length);
                 if (result.length == 0) {
                     connection.release();
@@ -164,10 +185,14 @@ const addGreenhouses = async (req, res) => {
                     res.send({ success: false, message: 'ไม่พบสถานที่' });
                 }
                 else {
+                    console.log(result[0]["LocationID"])
+                    const sqlInsert = "INSERT INTO greenhouses (LocationID,Name, IsActive, Remark, CreateTime,CreateBy, UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?)"
+                    const insert_query = mysql.format(sqlInsert, [result[0]["LocationID"], Name, IsActive, Remark, dateTime,CreateBy , dateTime,UpdateBy])
+
                     connection.query(searchName_query, async (err, result) => {
                         if (err)
                             throw (err);
-                        console.log("------> Search Name Location");
+                        console.log("------> Search Name GH");
                         console.log(result.length);
                         if (result.length != 0) {
                             connection.release();
@@ -575,6 +600,6 @@ const subdistricts = function (req, res) {
 
 }
 
-module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains, getInventorys, getPots, countcht ,provinces,districts,subdistricts}
+module.exports = { addStrains, addLocations, addGreenhouses, addPots, addInventorys, addChemicalUses, getGreenhouses, getStrains, getInventorys, getPots, countcht ,provinces,districts,subdistricts,getLocations}
 
 
