@@ -120,10 +120,8 @@ const editProfile = async (req, res) => {
     const fnameT = req.body.fnameT;
     const lnameT = req.body.lnameT;
     const fnameE = req.body.fnameE;
-    const lnameE = req.body.lnameE
-    const email = req.body.email
-    //const Password = req.body.password;
-    //const confirmPassword = req.body.confirmPassword;
+    const lnameE = req.body.lnameE;
+    const email = req.body.email;
 
     //console.log(dateTime);
     connection.getConnection(async (err, connection) => {
@@ -241,7 +239,6 @@ const getUserbyid = function (req, res) {
 
 const changepassword = async (req, res) => {
     const userid = req.body.id;
-   
     const hashedPassword = await md5(req.body.newpassword);
     const Password = req.body.password;
     const NewPassword = req.body.newpassword;
@@ -284,12 +281,12 @@ const changepassword = async (req, res) => {
                                 res.send({ success: true, message: 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว'})
                             })
                         } else {
-                            res.send({ success: false, message: 'รหัสผ่านไม่ตรงกัน' })
+                            res.send({ success: false, message: 'รหัสผ่านใหม่ไม่ตรงกัน' })
                         }
                     }
                     else {
                         console.log("---------> Password Incorrect")
-                        res.send({ success: false, message: 'รหัสผ่านไม่ถูกต้อง!' })
+                        res.send({ success: false, message: 'รหัสผ่านปัจจุบันไม่ถูกต้อง!' })
                     }
                     
                     
