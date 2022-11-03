@@ -201,9 +201,9 @@ const getPlanttrackingbyid = function (req, res) {
 }
 
 const getCountDisease = function (req, res) {
-
+    const culid = req.query.culid;
     connection.query(
-        "SELECT CultivationID,COUNT(PotID) Count FROM (SELECT cultivations.CultivationID,pots.PotID FROM ((`cultivations` INNER JOIN pots ON cultivations.CultivationID=pots.CultivationID ) INNER JOIN plant_trackings ON pots.PotID=plant_trackings.PotID) INNER JOIN disease_logs ON plant_trackings.PlantTrackingID = disease_logs.PlantTrackingID WHERE disease_logs.Disease != 'ไม่พบ' GROUP BY pots.PotID) AS subquery WHERE CultivationID = (SELECT cultivations.CultivationID FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID INNER JOIN strains ON cultivations.StrainID=strains.StrainID ORDER BY cultivations.CultivationID DESC LIMIT 1)",
+        "SELECT CultivationID,COUNT(PotID) Count FROM (SELECT * FROM (SELECT CultivationID FROM `cultivations`) AS C LEFT JOIN (SELECT cultivations.CultivationID cid,pots.PotID FROM ((`cultivations` INNER JOIN pots ON cultivations.CultivationID=pots.CultivationID ) INNER JOIN plant_trackings ON pots.PotID=plant_trackings.PotID) INNER JOIN disease_logs ON plant_trackings.PlantTrackingID = disease_logs.PlantTrackingID WHERE disease_logs.Disease != 'ไม่พบ' GROUP BY pots.PotID) AS P ON C.CultivationID = P.cid) AS subquery WHERE CultivationID = ?",[culid],
         function (err, results) {
             if (err) throw err;
 
@@ -226,9 +226,9 @@ const getCountDisease = function (req, res) {
 }
 
 const getCountInsect = function (req, res) {
-
+    const culid = req.query.culid;
     connection.query(
-        "SELECT CultivationID,COUNT(PotID) Count FROM (SELECT cultivations.CultivationID,pots.PotID FROM ((`cultivations` INNER JOIN pots ON cultivations.CultivationID=pots.CultivationID ) INNER JOIN plant_trackings ON pots.PotID=plant_trackings.PotID) INNER JOIN insect_logs ON plant_trackings.PlantTrackingID = insect_logs.PlantTrackingID WHERE insect_logs.Insect != 'ไม่พบ' GROUP BY pots.PotID) AS subquery WHERE CultivationID = (SELECT cultivations.CultivationID FROM cultivations INNER JOIN greenhouses ON cultivations.GreenHouseID=greenhouses.GreenHouseID INNER JOIN strains ON cultivations.StrainID=strains.StrainID ORDER BY cultivations.CultivationID DESC LIMIT 1)",
+        "SELECT CultivationID,COUNT(PotID) Count FROM (SELECT * FROM (SELECT CultivationID FROM `cultivations`) AS C LEFT JOIN (SELECT cultivations.CultivationID cid,pots.PotID FROM ((`cultivations` INNER JOIN pots ON cultivations.CultivationID=pots.CultivationID ) INNER JOIN plant_trackings ON pots.PotID=plant_trackings.PotID) INNER JOIN insect_logs ON plant_trackings.PlantTrackingID = insect_logs.PlantTrackingID WHERE insect_logs.Insect != 'ไม่พบ' GROUP BY pots.PotID) AS P ON C.CultivationID = P.cid) AS subquery WHERE CultivationID =?",[culid],
         function (err, results) {
             if (err) throw err;
 
