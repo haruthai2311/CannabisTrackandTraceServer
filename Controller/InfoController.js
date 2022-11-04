@@ -139,7 +139,7 @@ const getLocations = function (req, res) {
             if (results.length == 0) {
                 console.log("------> exists")
                 //res.sendStatus(409) 
-                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+                res.json(results)
             }
             else {
                 res.json(results)
@@ -229,7 +229,7 @@ const getGreenhouses = function (req, res) {
             if (results.length == 0) {
                 console.log("------> exists")
                 //res.sendStatus(409) 
-                res.json({ success: false, message: 'ไม่มีข้อมูล!' })
+                res.json(results)
             }
             else {
                 res.json(results)
