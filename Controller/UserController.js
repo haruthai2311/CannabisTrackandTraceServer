@@ -93,8 +93,8 @@ const User = (req, res) => {
                 }
                 else {
                     const hashedPassword = await md5(password);
-                    //onsole.log(result[0]['Password'])
-                    //console.log(hashedPassword)
+                    console.log(result[0]['Password'])
+                    console.log(hashedPassword)
                     //get the hashedPassword from result
                     if (result[0]['Password'] == hashedPassword) {
                         const token = jwt.sign({ id: result[0]['UserID'] }, 'the-super-strong-secrect',)
