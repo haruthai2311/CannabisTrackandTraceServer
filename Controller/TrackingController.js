@@ -11,7 +11,7 @@ const TimeNow = Time.TimeNow;
 const addPlanttracking = async (req, res) => {
     const nameGreenHouse = req.body.nameGreenHouse;
     const CheckDate = req.body.CheckDate;
-    const PotID = req.body.PotID;
+    const PotBarcode = req.body.PotBarcode;
     const PlantStatus = req.body.PlantStatus;
     const SoilMoisture = req.body.SoilMoisture;
     const Remark = req.body.Remark;
@@ -36,26 +36,10 @@ const addPlanttracking = async (req, res) => {
             const sqlSearchGH = "SELECT * FROM greenhouses WHERE Name = ?";
             const searchGH_query = mysql.format(sqlSearchGH, [nameGreenHouse]);
 
-            const sqlSearchPot = "SELECT * FROM pots WHERE PotID = ?";
-            const searchPot_query = mysql.format(sqlSearchPot, [PotID]);
+            const sqlSearchPot = "SELECT * FROM pots WHERE Barcode = ?";
+            const searchPot_query = mysql.format(sqlSearchPot, [PotBarcode]);
 
-            //plant_trackings
-            //const sqlInsertPlantTracking = "INSERT INTO plant_trackings (PotID,CheckDate,PlantStatus,SoilMoisture,SoilRemark,Remark,CreateTime,CreateBy,CreateTime,UpdateTime,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
-            //เหลือรูปกับ Update By ,Create By
-            const sqlInsertPlantTracking =
-                "INSERT INTO plant_trackings (PotID,CheckDate,PlantStatus,SoilMoisture,SoilRemark,Remark,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?)";
-            const insertPlantTracking_query = mysql.format(sqlInsertPlantTracking, [
-                PotID,
-                CheckDateTime,
-                PlantStatus,
-                SoilMoisture,
-                SoilRemark,
-                Remark,
-                dateTime,
-                CreateBy,
-                dateTime,
-                UpdateBy,
-            ]);
+          
 
             // ? will be replaced by values
             // ?? will be replaced by string
@@ -71,7 +55,7 @@ const addPlanttracking = async (req, res) => {
                 } else {
                     connection.query(searchPot_query, async (err, result) => {
                         if (err) throw err;
-                        console.log("------> Search PotID");
+                        console.log("------> Search PotBarcode");
                         console.log(result.length);
                         if (result.length == 0) {
                             connection.release();
@@ -79,6 +63,21 @@ const addPlanttracking = async (req, res) => {
                             //res.sendStatus(409)
                             res.send({ success: false, message: "ไม่พบหมายเลขกระถาง" });
                         } else {
+                            console.log(result[0]["PotID"])
+                            const sqlInsertPlantTracking =
+                            "INSERT INTO plant_trackings (PotID,CheckDate,PlantStatus,SoilMoisture,SoilRemark,Remark,CreateTime,CreateBy,UpdateTime,UpdateBy) VALUES (?,?,?,?,?,?,?,?,?,?)";
+                        const insertPlantTracking_query = mysql.format(sqlInsertPlantTracking, [
+                            result[0]["PotID"],
+                            CheckDateTime,
+                            PlantStatus,
+                            SoilMoisture,
+                            SoilRemark,
+                            Remark,
+                            dateTime,
+                            CreateBy,
+                            dateTime,
+                            UpdateBy,
+                        ]);
                             await connection.query(
                                 insertPlantTracking_query,
                                 (err, result) => {
