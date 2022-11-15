@@ -1062,6 +1062,26 @@ const getInfoCul = function (req, res) {
     );
 };
 
+const getpotsandplant = function (req, res) {
+    connection.query(
+        "SELECT pot.* FROM (SELECT pots.PotID,pots.GreenHouseID,greenhouses.Name GHName,pots.Name,pots.Barcode,pots.CultivationID FROM `pots` JOIN greenhouses ON pots.GreenHouseID = greenhouses.GreenHouseID) AS pot INNER JOIN plant_trackings ON pot.PotID = plant_trackings.PotID GROUP BY pot.PotID",
+        function (err, results) {
+            if (err) throw err;
+            console.log("------> Search");
+            //console.log(results.length)
+            if (results.length == 0) {
+                console.log("------> exists");
+                //res.sendStatus(409)
+                res.json(results);
+            } else {
+                res.json(results);
+            }
+            //res.json(results);
+            //console.log('OK')
+        }
+    );
+};
+
 module.exports = {
     addPlanttracking,
     editPlanttracking,
@@ -1085,4 +1105,5 @@ module.exports = {
     getCultivationByGH,
     getHarvestByGH,
     getInfoCul,
+    getpotsandplant
 };
